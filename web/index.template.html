@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hood Guesser</title>
+<style>
+  :root {
+    --bg: #11202b; --panel: #1a2e3c; --ink: #eef3f6; --muted: #9db3c2; --accent: #f2b84b;
+    --water: #0d1820; --wrong: #d9534f; --right: #3fae6a; --sel: #f2b84b; --line: #0d1820;
+    --bk: #5f7a8c; --bx: #6b8a78; --mn: #7f7a96; --qn: #8f7f69; --si: #6f8696;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #eef2f5; --panel: #fff; --ink: #14212b; --muted: #55697a; --water: #cfe0ea; --line: #cfe0ea;
+            --bk: #a9bccb; --bx: #b4c8b9; --mn: #bcb7d0; --qn: #cdbfa8; --si: #aec0cd; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #app { display: flex; flex-direction: column; height: 100%; max-width: 900px; margin: 0 auto; padding: 8px 12px; gap: 8px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  h1 { font-size: 18px; margin: 0; letter-spacing: .02em; }
+  .meta { color: var(--muted); font-size: 13px; }
+  button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--muted); border-radius: 8px;
+    padding: 6px 12px; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  button.primary { background: var(--accent); color: #1c1403; border-color: var(--accent); font-weight: 600; }
+  #clues { background: var(--panel); border-radius: 10px; padding: 8px 12px; margin: 0; list-style: none; display: grid; gap: 4px; }
+  #clues li { display: flex; gap: 8px; }
+  #clues .n { color: var(--accent); font-weight: 700; min-width: 1.2em; }
+  #clues li.locked { color: var(--muted); }
+  #mapwrap { position: relative; flex: 1 1 auto; min-height: 240px; background: var(--water); border-radius: 10px; overflow: hidden; touch-action: none; }
+  svg { width: 100%; height: 100%; display: block; }
+  path.hood { stroke: var(--line); stroke-width: 0.6px; vector-effect: non-scaling-stroke; cursor: pointer; }
+  path.hood:hover { filter: brightness(1.25); }
+  path.BK { fill: var(--bk); } path.BX { fill: var(--bx); } path.MN { fill: var(--mn); }
+  path.QN { fill: var(--qn); } path.SI { fill: var(--si); }
+  path.hood.wrong { fill: var(--wrong); }   /* overridden inline with a distance colour */
+  #guesses { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  #guesses li { background: var(--panel); border-radius: 999px; padding: 2px 10px; font-size: 13px; border-left: 10px solid; }
+  path.hood.right { fill: var(--right); }
+  path.hood.sel { fill: var(--sel); }
+  .zoom { position: absolute; right: 8px; top: 8px; display: grid; gap: 4px; }
+  .zoom button { width: 34px; height: 34px; padding: 0; font-size: 18px; }
+  #bar { display: flex; align-items: center; gap: 8px; min-height: 40px; }
+  #sel { flex: 1; color: var(--muted); }
+  #sel b { color: var(--ink); }
+  #result { background: var(--panel); border-radius: 10px; padding: 10px 12px; display: none; }
+  #result h2 { margin: 0 0 4px; font-size: 16px; }
+  #result pre { margin: 6px 0; font: inherit; white-space: pre-wrap; user-select: all; }
+  #share { width: 100%; font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: 6px; display: none; resize: none; }
+  dialog { background: var(--panel); color: var(--ink); border: 1px solid var(--muted); border-radius: 12px; max-width: 520px; width: calc(100% - 32px); }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  dialog h2 { margin-top: 0; } dialog ul { padding-left: 18px; }
+  .banner { text-align: center; padding: 40px 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div><h1>Hood Guesser</h1><div class="meta" id="meta"></div></div>
+    <div><button id="help" aria-label="About and credits">?</button></div>
+  </header>
+  <ol id="clues"></ol>
+  <ul id="guesses" aria-label="Your guesses"></ul>
+  <div id="mapwrap">
+    <svg id="map" role="img" aria-label="Map of New York City neighborhoods. Select one to guess."></svg>
+    <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" aria-label="Reset view" style="font-size:13px">&#8634;</button></div>
+  </div>
+  <div id="bar"><div id="sel">Tap a neighborhood on the map.</div><button class="primary" id="confirm" disabled>Guess</button></div>
+  <div id="result"></div>
+</div>
+
+<dialog id="about">
+  <h2>How to play</h2>
+  <p>Guess the NYC neighborhood from clues drawn from NYC Open Data. You get 5 guesses; each wrong guess reveals another clue. There is one puzzle a day, resetting at midnight New York time.</p>
+  <p>Wrong guesses are coloured from warm (close to the answer) to cold (far away), with the distance between neighborhood centres shown.</p>
+  <p>Neighborhoods are the city's 2020 Neighborhood Tabulation Areas. Clues about "per square kilometre" rankings compare the 197 residential ones.</p>
+  <h2>Data credits</h2>
+  <ul>
+    <li>2020 Neighborhood Tabulation Areas, NYC Dept. of City Planning</li>
+    <li>2015 Street Tree Census, NYC Parks</li>
+    <li>311 Service Requests, NYC 311 / OTI</li>
+    <li>Restaurant Inspection Results, NYC DOHMH</li>
+    <li>Rodent Inspection, NYC DOHMH</li>
+    <li>Hydrants, NYC DEP</li>
+    <li>Individual Landmark Sites, NYC Landmarks Preservation Commission</li>
+    <li>MTA Subway Stations and Complexes, MTA (data.ny.gov)</li>
+  </ul>
+  <form method="dialog"><button class="primary">Close</button></form>
+</dialog>
+
+<script>
+"use strict";
+const SHAPES = /*SHAPES*/[];
+const SCHEDULE_B64 = "/*SCHEDULE*/";
+const LAUNCH = "/*LAUNCH*/";
+const KEY = "nyc-hoods", MAX = 5, BORO = { Brooklyn: "BK", Bronx: "BX", Manhattan: "MN", Queens: "QN", "Staten Island": "SI" };
+
+// ---------- storage (localStorage may throw in iframes; fall back to memory) ----------
+const mem = {};
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] ?? null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } },
+};
+function load() { try { return JSON.parse(store.get("hoodguesser") || "{}"); } catch (e) { return {}; } }
+function save(s) { store.set("hoodguesser", JSON.stringify(s)); }
+
+// ---------- today's puzzle ----------
+function nyDate() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date()); // YYYY-MM-DD
+}
+const dayNum = d => Math.round((Date.parse(d + "T00:00:00Z") - Date.parse(LAUNCH + "T00:00:00Z")) / 864e5) + 1;
+function decode() {
+  const bin = atob(SCHEDULE_B64);
+  const bytes = Uint8Array.from(bin, (c, i) => c.charCodeAt(0) ^ KEY.charCodeAt(i % KEY.length));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+const $ = id => document.getElementById(id);
+const byId = Object.fromEntries(SHAPES.map(s => [s.id, s]));
+
+const params = new URLSearchParams(location.search);
+const today = params.get("date") || window.TEST_DATE || nyDate();   // ?date=YYYY-MM-DD is handy for testing
+const num = dayNum(today);
+const puzzles = decode();
+const puzzle = puzzles.find(p => p.day === num);
+let state = load();
+state.results = state.results || {};
+state.streak = state.streak || 0;
+
+if (!puzzle) {
+  $("clues").style.display = $("mapwrap").style.display = $("bar").style.display = "none";
+  const b = document.createElement("div");
+  b.className = "banner";
+  b.textContent = num < 1 ? `Hood Guesser launches on ${LAUNCH}. See you then!` : "No puzzle scheduled for today yet. Check back soon!";
+  $("app").appendChild(b);
+} else start();
+
+function start() {
+  const rec = state.results[num] || { guesses: [], done: false, won: false };
+  state.results[num] = rec;
+  let selected = null;
+
+  $("meta").textContent = `Puzzle #${num} · streak ${state.streak}`;
+
+  // ----- map -----
+  const svg = $("map"), NS = "http://www.w3.org/2000/svg";
+  const bounds = { x: 0, y: 0, w: 1, h: 1 };
+  const g = document.createElementNS(NS, "g");
+  svg.appendChild(g);
+  const els = {};
+  let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+  for (const s of SHAPES) {
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", s.d);
+    p.setAttribute("class", "hood " + BORO[s.boro]);
+    p.dataset.id = s.id;
+    g.appendChild(p);
+    els[s.id] = p;
+  }
+  const bb = g.getBBox();
+  Object.assign(bounds, { x: bb.x - 2000, y: bb.y - 2000, w: bb.width + 4000, h: bb.height + 4000 });
+  let view = { ...bounds };
+  const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
+  function fit() {
+    const r = svg.getBoundingClientRect(), ar = r.width / r.height;
+    view = { ...bounds };
+    if (bounds.w / bounds.h < ar) { view.w = bounds.h * ar; view.x = bounds.x - (view.w - bounds.w) / 2; }
+    else { view.h = bounds.w / ar; view.y = bounds.y - (view.h - bounds.h) / 2; }
+    apply();
+  }
+  function zoomAt(f, cx, cy) {   // cx, cy in svg units
+    const nw = Math.min(Math.max(view.w * f, bounds.w / 40), bounds.w * 1.5), k = nw / view.w;
+    view = { x: cx - (cx - view.x) * k, y: cy - (cy - view.y) * k, w: nw, h: view.h * k };
+    apply();
+  }
+  const toSvg = (px, py) => { const r = svg.getBoundingClientRect(); return [view.x + (px - r.left) / r.width * view.w, view.y + (py - r.top) / r.height * view.h]; };
+  svg.addEventListener("wheel", e => { e.preventDefault(); zoomAt(e.deltaY < 0 ? 0.8 : 1.25, ...toSvg(e.clientX, e.clientY)); }, { passive: false });
+  const ptrs = new Map(); let moved = 0, pinch = 0;
+  svg.addEventListener("pointerdown", e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 1) moved = 0; });
+  svg.addEventListener("pointermove", e => {
+    if (!ptrs.has(e.pointerId)) return;
+    const [ox, oy] = ptrs.get(e.pointerId);
+    ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (pinch) zoomAt(pinch / d, ...toSvg((a[0] + b[0]) / 2, (a[1] + b[1]) / 2));
+      pinch = d; moved = 99;
+    } else {
+      moved += Math.abs(e.clientX - ox) + Math.abs(e.clientY - oy);
+      const r = svg.getBoundingClientRect();
+      view.x -= (e.clientX - ox) / r.width * view.w; view.y -= (e.clientY - oy) / r.height * view.h; apply();
+    }
+  });
+  const up = e => { ptrs.delete(e.pointerId); pinch = 0; };
+  svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
+  svg.addEventListener("click", e => {
+    if (moved > 6 || rec.done) return;
+    const t = document.elementFromPoint(e.clientX, e.clientY);   // pointer capture retargets e.target to the svg
+    const id = t && t.dataset && t.dataset.id;
+    if (id) select(id);
+  });
+  $("zin").onclick = () => zoomAt(0.7, view.x + view.w / 2, view.y + view.h / 2);
+  $("zout").onclick = () => zoomAt(1.4, view.x + view.w / 2, view.y + view.h / 2);
+  $("zfit").onclick = fit;
+  addEventListener("resize", fit);
+  fit();
+
+  // ----- distance feedback -----
+  const KM_PER_UNIT = 111 / 100000;   // build.py projects 100000 units per degree of latitude
+  const distKm = id => Math.hypot(byId[id].c[0] - byId[puzzle.answer].c[0], byId[id].c[1] - byId[puzzle.answer].c[1]) * KM_PER_UNIT;
+  const STOPS = [[217, 60, 40], [236, 190, 110], [60, 105, 175]];   // close red -> mid tan -> far blue; no green, which means "correct"
+  const heat = km => {
+    const t = Math.min(km / 30, 1) * 2, i = Math.min(Math.floor(t), 1), f = t - i;
+    return `rgb(${STOPS[i].map((v, k) => Math.round(v + (STOPS[i + 1][k] - v) * f)).join(",")})`;
+  };
+  const tile = km => km < 3 ? "\ud83d\udfe8" : km < 10 ? "\ud83d\udfe7" : "\ud83d\udfe5";
+  function markWrong(id) {
+    els[id].classList.add("wrong");
+    els[id].style.fill = heat(distKm(id));
+  }
+  function renderGuesses() {
+    $("guesses").innerHTML = "";
+    for (const id of rec.guesses) {
+      if (id === puzzle.answer) continue;
+      const li = document.createElement("li");
+      const km = distKm(id);
+      li.style.borderLeftColor = heat(km);
+      li.textContent = `${byId[id].name} \u00b7 ${km < 1 ? "<1" : km.toFixed(1)} km away`;
+      $("guesses").appendChild(li);
+    }
+  }
+
+  // ----- clues & guesses -----
+  function renderClues() {
+    const shown = rec.done ? puzzle.clues.length : Math.min(rec.guesses.length + 1, puzzle.clues.length);
+    $("clues").innerHTML = "";
+    puzzle.clues.forEach((c, i) => {
+      const li = document.createElement("li");
+      if (i >= shown) li.className = "locked";
+      li.innerHTML = `<span class="n">${i + 1}</span><span></span>`;
+      li.lastChild.textContent = i < shown ? c : "Locked — a wrong guess reveals it.";
+      $("clues").appendChild(li);
+    });
+  }
+  function select(id) {
+    if (rec.guesses.includes(id)) return;
+    if (selected) els[selected].classList.remove("sel");
+    selected = id; els[id].classList.add("sel");
+    $("sel").innerHTML = `Selected: <b></b>`;
+    $("sel").firstElementChild.textContent = byId[id].name;
+    $("confirm").disabled = false;
+  }
+  function shareText() {
+    const row = rec.guesses.map((g, i) => (rec.won && i === rec.guesses.length - 1) ? "🟩" : "🟥");
+    while (row.length < MAX) row.push("⬛");
+    return `Hood Guesser #${num} ${rec.won ? rec.guesses.length : "X"}/${MAX}\n${row.join("")}`;
+  }
+  function finish() {
+    $("bar").style.display = "none";
+    els[puzzle.answer].classList.remove("sel", "wrong");
+    els[puzzle.answer].classList.add("right");
+    renderClues();
+    const r = $("result");
+    r.style.display = "block";
+    r.innerHTML = `<h2></h2><pre></pre><button class="primary" id="copy">Copy result</button><textarea id="share" rows="3" readonly></textarea>`;
+    r.querySelector("h2").textContent = rec.won ? `Correct! ${byId[puzzle.answer].name}` : `It was ${byId[puzzle.answer].name}`;
+    r.querySelector("pre").textContent = shareText() + `\nStreak: ${state.streak}`;
+    const t = shareText();
+    $("copy").onclick = async () => {
+      try { await navigator.clipboard.writeText(t); $("copy").textContent = "Copied!"; }
+      catch (e) { const ta = $("share"); ta.style.display = "block"; ta.value = t; ta.select(); }
+    };
+    // zoom to the answer so the loser sees where it was
+    const bb2 = els[puzzle.answer].getBBox();
+    const k = 6000, cx = bb2.x + bb2.width / 2, cy = bb2.y + bb2.height / 2;
+    view = { x: cx - k, y: cy - k * view.h / view.w, w: k * 2, h: k * 2 * view.h / view.w }; apply();
+  }
+  function recordEnd() {
+    rec.done = true;
+    const prev = Object.keys(state.results).map(Number).filter(d => d < num && state.results[d].done).sort((a, b) => b - a)[0];
+    state.streak = rec.won ? ((prev === num - 1 && state.results[prev].won) ? state.streak : 0) + 1 : 0;
+  }
+  $("confirm").onclick = () => {
+    if (!selected || rec.done) return;
+    rec.guesses.push(selected);
+    els[selected].classList.remove("sel");
+    const id = selected; selected = null;
+    $("confirm").disabled = true;
+    $("sel").textContent = "Tap a neighborhood on the map.";
+    if (id === puzzle.answer) { rec.won = true; recordEnd(); }
+    else {
+      markWrong(id);
+      if (rec.guesses.length >= MAX) recordEnd();
+    }
+    save(state);
+    $("meta").textContent = `Puzzle #${num} · streak ${state.streak}`;
+    renderClues();
+    renderGuesses();
+    if (rec.done) finish();
+  };
+  $("help").onclick = () => $("about").showModal();
+
+  // restore saved progress
+  for (const id of rec.guesses) if (id !== puzzle.answer) markWrong(id);
+  renderClues();
+  renderGuesses();
+  if (rec.done) finish();
+}
+</script>
+</body>
+</html>
