@@ -11,7 +11,16 @@ A daily puzzle game. Players guess an NYC neighborhood from clues derived from N
 - Win: correct guess within 5. Lose: 5 wrong guesses; the answer is highlighted and all clues are listed.
 - Day ends on win or loss. Result is stored; replaying the same day is blocked.
 
-### Clue ladder
+### Clue ladder (revised 2026-10-19)
+1. Tight: "one of the 5 neighborhoods in NYC with the most X", or a compound "bottom quartile for A, B and C".
+2. Broader: density bands (top/bottom 20%) or "one of the 20 neighborhoods with the most X".
+3. Demographics from ACS as thresholds (income, age, rent share, largest ethnic group, commute, education...).
+4. Borough.
+5. Clincher: subway lines or landmark names.
+
+Every clue carries the exact set of neighborhoods it is true for. `pipeline/solver.py` enumerates clue combinations and only accepts ones that narrow gradually (see limits there); `schedule.py` draws from those. Demographics come from ACS 5-year (2020 to 2024) via Census Reporter, joined to 2020 NTAs with the DCP tract crosswalk, and the credits screen must name the Census Bureau.
+
+(Original ladder, superseded:)
 | # | Content |
 |---|---------|
 | 1 | Very niche stat |

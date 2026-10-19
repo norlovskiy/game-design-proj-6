@@ -27,9 +27,16 @@ CUISINES = ("Ethiopian", "Afghan", "Russian", "Polish", "Filipino", "Bangladeshi
             "German", "Egyptian", "Armenian", "Hawaiian", "Caribbean", "Korean", "Thai", "Bagels/Pretzels")
 
 
+def _num(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+
 def pts(rows, lat="lat", lon="lon"):
-    ok = [r for r in rows if r.get(lat) and r.get(lon)]
-    return ok, assign([float(r[lat]) for r in ok], [float(r[lon]) for r in ok])
+    ok = [r for r in rows if _num(r.get(lat)) is not None and _num(r.get(lon)) is not None]
+    return ok, assign([_num(r[lat]) for r in ok], [_num(r[lon]) for r in ok])
 
 
 def count_by_nta(rows, lat="lat", lon="lon", n="n"):
@@ -67,7 +74,9 @@ def trees():
         best = max((s for s, k in c.items() if k >= 50),
                    key=lambda s: (c[s] / total[i]) / (city[s] / sum(city.values())), default=None)
         sig[i] = {"top": c.most_common(1)[0][0], "top_share": c.most_common(1)[0][1] / total[i], "signature": best}
-    return {"street_trees": dict(total), "_labels": {"tree_species": sig}}
+    species_metrics = {f"species:{sp}": {i: c[sp] for i, c in species.items() if c[sp]}
+                       for sp, k in city.items() if k >= 800}     # absolute counts per common species
+    return {"street_trees": dict(total), **species_metrics, "_labels": {"tree_species": sig}}
 
 
 def complaints_311():
@@ -121,9 +130,70 @@ def subway():
     return {"subway_stations": {i: len(v) for i, v in st.items()}, "_labels": {"subway": st}}
 
 
+# (key, dataset id, lat column, lon column, optional extra where)
+POINT_SETS = [
+    ("count:public_art", "2pg3-gcaa", "latitude", "longitude", None),
+    ("count:temp_art", "3r2x-bnmj", "latitude", "longitude", None),
+    ("count:farmers_markets", "8vwk-6iz2", "latitude", "longitude", None),
+    ("count:firehouses", "hc8x-tcnd", "latitude", "longitude", None),
+    ("count:parking_meters", "693u-uax6", "lat", "long", None),
+    ("count:public_restrooms", "i7jb-7jku", "latitude", "longitude", None),
+    ("count:wifi_hotspots", "yjub-udmw", "latitude", "longitude", None),
+    ("count:hotels", "tjus-cn27", "latitude", "longitude", None),
+    ("count:bike_parking", "592z-n7dk", "latitude", "longitude", None),
+    ("count:cultural_orgs", "u35m-9t32", "latitude", "longitude", None),
+    ("count:pops", "rvih-nhyn", "latitude", "longitude", None),
+    ("count:community_gardens", "ajxm-kzmj", "latitude", "longitude", None),
+    ("count:bus_shelters", "t4f2-8md7", "latitude", "longitude", None),
+    ("count:computer_centers", "sejx-2gn3", "latitude", "longitude", None),
+]
+
+
+def point_sets():
+    out = {}
+    for key, ds, la, lo, extra in POINT_SETS:
+        where = f"{la} IS NOT NULL AND {lo} IS NOT NULL" + (f" AND {extra}" if extra else "")
+        for expr_la, expr_lo in ((la, lo), (f"to_number({la})", f"to_number({lo})")):   # some sets store coordinates as text
+            try:
+                rows = fetch_all(ds, select=f"round({expr_la},4) as lat, round({expr_lo},4) as lon, count(*) as n",
+                                 where=where, group="lat, lon", order="lat, lon")
+                out[key] = count_by_nta(rows)
+                break
+            except Exception as e:      # one flaky dataset shouldn't sink the run
+                err = e
+        else:   # text coordinates: these sets are small, so fetch raw rows and count locally
+            try:
+                rows = fetch_all(ds, select=f"{la} as lat, {lo} as lon, 1 as n", where=where, order=f"{la}, {lo}")
+                out[key] = count_by_nta(rows)
+            except Exception as e:
+                print("  skipped", key, str(e)[:80])
+    return out
+
+
+def dog_runs():
+    from shapely.geometry import shape
+    rows = query("hxx3-bwgv", limit=500)
+    pts_ = [shape(r["the_geom"]).centroid for r in rows if r.get("the_geom")]
+    c = Counter(i for i in assign([p.y for p in pts_], [p.x for p in pts_]) if i)
+    return {"count:dog_runs": dict(c)}
+
+
+def licenses():
+    """DCWP issued licenses by business category (e.g. Pawnbroker, Tow Truck, Sidewalk Cafe)."""
+    rows = fetch_all("w7w3-xahh", select="round(latitude,4) as lat, round(longitude,4) as lon, business_category, count(*) as n",
+                     where="latitude IS NOT NULL AND license_status='Active'", group="lat, lon, business_category",
+                     order="lat, lon, business_category")
+    ok, ids = pts(rows)
+    cats = defaultdict(Counter)
+    for r, i in zip(ok, ids):
+        if i:
+            cats[r["business_category"]][i] += int(r["n"])
+    return {f"license:{c}": dict(v) for c, v in cats.items() if sum(v.values()) >= 60}
+
+
 def main():
     metrics, labels = {}, {}
-    for fn in (hydrants, trees, complaints_311, restaurants, rodents, landmarks, subway):
+    for fn in (hydrants, trees, complaints_311, restaurants, rodents, landmarks, subway, point_sets, dog_runs, licenses):
         print("extracting", fn.__name__, flush=True)
         res = fn()
         labels.update(res.pop("_labels", {}))

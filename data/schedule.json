@@ -2,631 +2,811 @@
  {
   "day": 1,
   "date": "2026-10-19",
-  "answer": "SI0107",
-  "answer_name": "Mariner's Harbor-Arlington-Graniteville",
+  "answer": "SI0204",
+  "answer_name": "New Springville-Willowbrook-Bulls Head-Travis",
   "clues": [
-   "Its street trees are unusually rich in Hawthorn.",
-   "Per square kilometre, it has the 5th-fewest fire hydrants of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 4th-fewest street trees of NYC's 197 residential neighborhoods.",
+   "It is one of the 5 neighborhoods in NYC with the most dead animal complaints per resident.",
+   "Per square kilometre, it is in the bottom 20% of NYC neighborhoods for restaurants.",
+   "Fewer than 30% of households rent.",
    "It is in Staten Island.",
-   "Landmarks here include: Standard Varnish Works Factory Office Building; Stephen D. Barnes House."
+   "Landmarks here include: Asbury Methodist Church; Decker Farmhouse."
   ],
   "templates": [
-   "tree_signature",
-   "hydrants",
-   "street_trees",
+   "top5:311:Dead Animal",
+   "densebot20:restaurants",
+   "demo_lo:pct_renter",
    "borough",
    "landmark_name"
   ],
-  "clue1_matches": 5
+  "candidates_after_clue": [
+   5,
+   3,
+   2,
+   2,
+   1
+  ]
  },
  {
   "day": 2,
   "date": "2026-10-20",
-  "answer": "MN0603",
-  "answer_name": "Murray Hill-Kips Bay",
+  "answer": "QN0201",
+  "answer_name": "Long Island City-Hunters Point",
   "clues": [
-   "Per square kilometre, it has the 3rd-most helicopter noise complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 7th-most taxi complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for restaurants.",
-   "It is in Manhattan.",
-   "Landmarks here include: 152 East 38th Street House; Adelaide L. T. Douglas Residence; Allerton 39th Street House."
+   "It is one of the 5 neighborhoods in NYC with the most unleashed dog complaints per resident.",
+   "Per square kilometre, it is in the top 20% of NYC neighborhoods for restaurants.",
+   "Over 30% of workers work from home.",
+   "It is in Queens.",
+   "Subway lines serving it: 7, E, F, G, N, W."
   ],
   "templates": [
-   "311:Noise - Helicopter",
-   "311:Taxi Complaint",
-   "restaurants",
+   "top5:311:Unleashed Dog",
+   "densetop20:restaurants",
+   "demo_hi:pct_wfh",
    "borough",
-   "landmark_name"
+   "subway_lines"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   5,
+   2,
+   2,
+   1,
+   1
+  ]
  },
  {
   "day": 3,
   "date": "2026-10-21",
-  "answer": "QN0401",
-  "answer_name": "Elmhurst",
+  "answer": "BK1303",
+  "answer_name": "Brighton Beach",
   "clues": [
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for public-urination complaints.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for public-drinking complaints.",
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for restaurants.",
-   "It is in Queens.",
-   "Subway lines serving it: 7, E, F, M, R."
-  ],
-  "templates": [
-   "311:Urinating in Public",
-   "311:Drinking",
-   "restaurants",
-   "borough",
-   "subway_lines"
-  ],
-  "clue1_matches": 8
- },
- {
-  "day": 4,
-  "date": "2026-10-22",
-  "answer": "BK0703",
-  "answer_name": "Sunset Park (Central)",
-  "clues": [
-   "Per square kilometre, it has the 3rd-most abandoned-bike reports of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 4th-most mobile-food-vendor complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for restaurants.",
-   "It is in Brooklyn.",
-   "Subway lines serving it: N."
-  ],
-  "templates": [
-   "311:Abandoned Bike",
-   "311:Mobile Food Vendor",
-   "restaurants",
-   "borough",
-   "subway_lines"
-  ],
-  "clue1_matches": 1
- },
- {
-  "day": 5,
-  "date": "2026-10-23",
-  "answer": "MN0101",
-  "answer_name": "Financial District-Battery Park City",
-  "clues": [
-   "Its street trees are unusually rich in Willow Oak.",
-   "Per square kilometre, it has the 5th-most fire hydrants of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 4th-most individually landmarked sites of NYC's 197 residential neighborhoods.",
-   "It is in Manhattan.",
-   "Subway lines serving it: 1, 2, 3, 4, 5, A, C, J, R, W, Z."
-  ],
-  "templates": [
-   "tree_signature",
-   "hydrants",
-   "landmarks",
-   "borough",
-   "subway_lines"
-  ],
-  "clue1_matches": 5
- },
- {
-  "day": 6,
-  "date": "2026-10-24",
-  "answer": "MN1101",
-  "answer_name": "East Harlem (South)",
-  "clues": [
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for lost-property reports to 311.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for rodent inspections that failed for rat activity.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for individually landmarked sites.",
-   "It is in Manhattan.",
-   "Landmarks here include: 28th Police Precinct Station House; Fire Engine Company No. 53; Lucy Dahlgren House."
-  ],
-  "templates": [
-   "311:Lost Property",
-   "rat_signs",
-   "landmarks",
-   "borough",
-   "landmark_name"
-  ],
-  "clue1_matches": 9
- },
- {
-  "day": 7,
-  "date": "2026-10-25",
-  "answer": "QN0502",
-  "answer_name": "Ridgewood",
-  "clues": [
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for house-of-worship noise complaints.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for dead-or-dying-tree reports.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for street trees.",
-   "It is in Queens.",
-   "Subway lines serving it: L, M."
-  ],
-  "templates": [
-   "311:Noise - House of Worship",
-   "311:Dead/Dying Tree",
-   "street_trees",
-   "borough",
-   "subway_lines"
-  ],
-  "clue1_matches": 10
- },
- {
-  "day": 8,
-  "date": "2026-10-26",
-  "answer": "BK0801",
-  "answer_name": "Prospect Heights",
-  "clues": [
-   "Per square kilometre, it has the 2nd-most helicopter noise complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 2nd-most dead-animal reports of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for restaurants.",
+   "It is one of the 5 neighborhoods in NYC with the most Russian restaurants.",
+   "Per square kilometre, it is in the bottom 20% of NYC neighborhoods for street trees.",
+   "Over 20% of commuters walk to work.",
    "It is in Brooklyn.",
    "Subway lines serving it: B, Q."
   ],
   "templates": [
-   "311:Noise - Helicopter",
-   "311:Dead Animal",
-   "restaurants",
+   "top5:cuisine:Russian",
+   "densebot20:street_trees",
+   "demo_hi:pct_walk",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   5,
+   4,
+   3,
+   1,
+   1
+  ]
+ },
+ {
+  "day": 4,
+  "date": "2026-10-22",
+  "answer": "MN0203",
+  "answer_name": "West Village",
+  "clues": [
+   "It is one of the 5 neighborhoods in NYC with the most outdoor dining complaints per resident.",
+   "It is one of the 20 neighborhoods in NYC with the most cultural organizations.",
+   "Fewer than 10% of residents are under 18.",
+   "It is in Manhattan.",
+   "Subway lines serving it: 1, A, B, C, D, E, F, M."
+  ],
+  "templates": [
+   "top5:311:Outdoor Dining",
+   "top20:count:cultural_orgs",
+   "demo_lo:pct_under18",
+   "borough",
+   "subway_lines"
+  ],
+  "candidates_after_clue": [
+   5,
+   3,
+   3,
+   3,
+   1
+  ]
+ },
+ {
+  "day": 5,
+  "date": "2026-10-23",
+  "answer": "MN1202",
+  "answer_name": "Washington Heights (North)",
+  "clues": [
+   "It is one of the 5 neighborhoods in NYC with the most black locust street trees.",
+   "It is one of the 20 neighborhoods in NYC with the most park-noise complaints per resident.",
+   "The largest racial/ethnic group is Hispanic or Latino, at over 55% of residents.",
+   "It is in Manhattan.",
+   "Landmarks here include: Holyrood Episcopal Church-Iglesia Santa Cruz; The Cloisters."
+  ],
+  "templates": [
+   "top5:species:black locust",
+   "top20:311:Noise - Park",
+   "demo_group:Hispanic",
+   "borough",
+   "landmark_name"
+  ],
+  "candidates_after_clue": [
+   5,
+   3,
+   2,
+   1,
+   1
+  ]
+ },
+ {
+  "day": 6,
+  "date": "2026-10-24",
+  "answer": "BK1701",
+  "answer_name": "East Flatbush-Erasmus",
+  "clues": [
+   "It is one of the 5 neighborhoods in NYC with the most Caribbean restaurants.",
+   "It is one of the 20 neighborhoods in NYC with the most cannabis-retailer complaints per resident.",
+   "The largest racial/ethnic group is Black, at over 70% of residents.",
+   "It is in Brooklyn.",
+   "Subway lines serving it: 2, 5."
+  ],
+  "templates": [
+   "top5:cuisine:Caribbean",
+   "top20:311:Cannabis Retailer",
+   "demo_group:Black",
+   "borough",
+   "subway_lines"
+  ],
+  "candidates_after_clue": [
+   5,
+   2,
+   2,
+   2,
+   1
+  ]
+ },
+ {
+  "day": 7,
+  "date": "2026-10-25",
+  "answer": "BK0502",
+  "answer_name": "East New York (North)",
+  "clues": [
+   "It is one of the 5 neighborhoods in NYC with the most community gardens.",
+   "Per square kilometre, it is in the top 20% of NYC neighborhoods for street trees.",
+   "Fewer than 20% of adults hold a bachelor's degree or higher.",
+   "It is in Brooklyn.",
+   "Subway lines serving it: C, J, L, Z."
+  ],
+  "templates": [
+   "top5:count:community_gardens",
+   "densetop20:street_trees",
+   "demo_lo:pct_ba",
+   "borough",
+   "subway_lines"
+  ],
+  "candidates_after_clue": [
+   5,
+   2,
+   1,
+   1,
+   1
+  ]
+ },
+ {
+  "day": 8,
+  "date": "2026-10-26",
+  "answer": "BX1001",
+  "answer_name": "Westchester Square",
+  "clues": [
+   "It is in the bottom quartile of NYC neighborhoods for bike-parking racks, hotels and bus shelters.",
+   "It is one of the 20 neighborhoods in NYC with the most cannabis-retailer complaints per resident.",
+   "Fewer than 5% of workers work from home.",
+   "It is in the Bronx.",
+   "Landmarks here include: Saint Peter's Church, Chapel and Cemetery; Van Schaick Free Reading Room/Huntington Free Library and Reading Room."
+  ],
+  "templates": [
+   "bottomq:count:bike_parking+count:bus_shelters+count:hotels",
+   "top20:311:Cannabis Retailer",
+   "demo_lo:pct_wfh",
+   "borough",
+   "landmark_name"
+  ],
+  "candidates_after_clue": [
+   11,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 9,
   "date": "2026-10-27",
-  "answer": "BK0202",
-  "answer_name": "Downtown Brooklyn-DUMBO-Boerum Hill",
+  "answer": "BK0301",
+  "answer_name": "Bedford-Stuyvesant (West)",
   "clues": [
-   "Its street trees are unusually rich in Ginkgo.",
-   "Per square kilometre, it has the 3rd-most mobile-food-vendor complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for individually landmarked sites.",
+   "It is one of the 5 neighborhoods in NYC with the most community gardens.",
+   "It is one of the 20 neighborhoods in NYC with the most Caribbean restaurants.",
+   "Fewer than 8% of residents are 65 or older.",
    "It is in Brooklyn.",
-   "Subway lines serving it: 2, 3, 4, 5, A, B, C, F, G, Q, R."
+   "Subway lines serving it: A, C, G, S."
   ],
   "templates": [
-   "tree_signature",
-   "311:Mobile Food Vendor",
-   "landmarks",
+   "top5:count:community_gardens",
+   "top20:cuisine:Caribbean",
+   "demo_lo:pct_65plus",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 16
+  "candidates_after_clue": [
+   5,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 10,
   "date": "2026-10-28",
-  "answer": "BX0202",
-  "answer_name": "Longwood",
+  "answer": "QN1103",
+  "answer_name": "Douglaston-Little Neck",
   "clues": [
-   "Its street trees are unusually rich in Common Hackberry.",
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for illegal-fireworks complaints.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for street trees.",
-   "It is in Bronx.",
-   "Landmarks here include: 62nd Police Precinct Station House."
+   "It is in the bottom quartile of NYC neighborhoods for bike-parking racks, hotels and bus shelters.",
+   "Per square kilometre, it is in the bottom 20% of NYC neighborhoods for restaurants.",
+   "Fewer than 30% of households rent.",
+   "It is in Queens.",
+   "Landmarks here include: Benjamin P. Allen House; Cornelius Van Wyck House."
   ],
   "templates": [
-   "tree_signature",
-   "311:Illegal Fireworks",
-   "street_trees",
+   "bottomq:count:bike_parking+count:bus_shelters+count:hotels",
+   "densebot20:restaurants",
+   "demo_lo:pct_renter",
    "borough",
    "landmark_name"
   ],
-  "clue1_matches": 3
+  "candidates_after_clue": [
+   11,
+   7,
+   6,
+   4,
+   1
+  ]
  },
  {
   "day": 11,
   "date": "2026-10-29",
-  "answer": "QN0301",
-  "answer_name": "Jackson Heights",
+  "answer": "BK0602",
+  "answer_name": "Park Slope",
   "clues": [
-   "14 of NYC's 82 Bangladeshi restaurants are here.",
-   "Per square kilometre, it has the 5th-most park-noise complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for street trees.",
-   "It is in Queens.",
-   "Subway lines serving it: 7."
+   "It is one of the 5 neighborhoods in NYC with the most American linden street trees.",
+   "It is one of the 20 neighborhoods in NYC with the most helicopter-noise complaints per resident.",
+   "Over 80% of adults hold a bachelor's degree or higher.",
+   "It is in Brooklyn.",
+   "Subway lines serving it: 2, 3, 4, 5, B, D, F, G, N, Q, R."
   ],
   "templates": [
-   "cuisine:Bangladeshi",
-   "311:Noise - Park",
-   "street_trees",
+   "top5:species:American linden",
+   "top20:311:Noise - Helicopter",
+   "demo_hi:pct_ba",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 2
+  "candidates_after_clue": [
+   5,
+   2,
+   2,
+   1,
+   1
+  ]
  },
  {
   "day": 12,
   "date": "2026-10-30",
-  "answer": "QN0602",
-  "answer_name": "Forest Hills",
+  "answer": "QN1102",
+  "answer_name": "Bayside",
   "clues": [
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for pigeon-nuisance complaints.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for dead-or-dying-tree reports.",
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for street trees.",
+   "It is one of the 5 neighborhoods in NYC with the most Korean restaurants.",
+   "It is one of the 20 neighborhoods in NYC with the most dead-or-dying-tree reports per resident.",
+   "The largest racial/ethnic group is Asian, at over 45% of residents.",
    "It is in Queens.",
-   "Subway lines serving it: E, F, M, R."
+   "Landmarks here include: 35-34 Bell Boulevard; Hawthorne Court Apartments; John William and Lydia Ann Bell Ahles House."
   ],
   "templates": [
-   "311:Unsanitary Pigeon Condition",
-   "311:Dead/Dying Tree",
-   "street_trees",
+   "top5:cuisine:Korean",
+   "top20:311:Dead/Dying Tree",
+   "demo_group:Asian",
    "borough",
-   "subway_lines"
+   "landmark_name"
   ],
-  "clue1_matches": 8
+  "candidates_after_clue": [
+   5,
+   2,
+   2,
+   2,
+   1
+  ]
  },
  {
   "day": 13,
   "date": "2026-10-31",
-  "answer": "MN0303",
-  "answer_name": "East Village",
+  "answer": "BX0703",
+  "answer_name": "Norwood",
   "clues": [
-   "Per square kilometre, it has the 3rd-most unleashed-dog complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 2nd-most cannabis-retailer complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 6th-most restaurants of NYC's 197 residential neighborhoods.",
-   "It is in Manhattan.",
-   "Subway lines serving it: F, L."
+   "It is one of the 5 neighborhoods in NYC with the most sawtooth oak street trees.",
+   "It is one of the 20 neighborhoods in NYC with the most cannabis-retailer complaints per resident.",
+   "The largest racial/ethnic group is Hispanic or Latino, at over 65% of residents.",
+   "It is in the Bronx.",
+   "Subway lines serving it: 4, D."
   ],
   "templates": [
-   "311:Unleashed Dog",
-   "311:Cannabis Retailer",
-   "restaurants",
+   "top5:species:sawtooth oak",
+   "top20:311:Cannabis Retailer",
+   "demo_group:Hispanic",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   6,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 14,
   "date": "2026-11-01",
-  "answer": "BK0203",
-  "answer_name": "Fort Greene",
+  "answer": "MN0901",
+  "answer_name": "Morningside Heights",
   "clues": [
-   "Its street trees are unusually rich in Horse Chestnut.",
-   "Per square kilometre, it has the 8th-most animal-in-a-park reports of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for restaurants.",
-   "It is in Brooklyn.",
-   "Landmarks here include: Hanson Place Baptist Church; Henry and Susan McDonald House; Lefferts-Laidlaw House."
+   "It is one of the 5 neighborhoods in NYC with the most public artworks.",
+   "It is one of the 20 neighborhoods in NYC with the most hotels.",
+   "Over 70% of adults hold a bachelor's degree or higher.",
+   "It is in Manhattan.",
+   "Landmarks here include: Casa Italiana; Cathedral Church of St. John the Divine and the Cathedral Close; Church of St. Joseph of the Holy Family."
   ],
   "templates": [
-   "tree_signature",
-   "311:Animal in a Park",
-   "restaurants",
+   "top5:count:public_art",
+   "top20:count:hotels",
+   "demo_hi:pct_ba",
    "borough",
    "landmark_name"
   ],
-  "clue1_matches": 3
+  "candidates_after_clue": [
+   5,
+   4,
+   4,
+   4,
+   1
+  ]
  },
  {
   "day": 15,
   "date": "2026-11-02",
-  "answer": "QN1401",
-  "answer_name": "Far Rockaway-Bayswater",
+  "answer": "BX0601",
+  "answer_name": "West Farms",
   "clues": [
-   "Per square kilometre, it has more public-urination complaints than any other residential neighborhood in NYC.",
-   "Per square kilometre, it is in the bottom 15% of NYC's residential neighborhoods for graffiti complaints.",
-   "Per square kilometre, it is in the bottom 10% of NYC's residential neighborhoods for restaurants.",
-   "It is in Queens.",
-   "Subway lines serving it: A."
+   "It is in the bottom quartile of NYC neighborhoods for cultural organizations, bus shelters and active electronics store licenses.",
+   "It is one of the 20 neighborhoods in NYC with the most park-noise complaints per resident.",
+   "More than 28% of residents are under 18.",
+   "It is in the Bronx.",
+   "Subway lines serving it: 2, 5."
   ],
   "templates": [
-   "311:Urinating in Public",
-   "311:Graffiti",
-   "restaurants",
+   "bottomq:count:bus_shelters+count:cultural_orgs+license:Electronics Store",
+   "top20:311:Noise - Park",
+   "demo_hi:pct_under18",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   13,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 16,
   "date": "2026-11-03",
-  "answer": "QN0701",
-  "answer_name": "College Point",
+  "answer": "QN0105",
+  "answer_name": "Queensbridge-Ravenswood-Dutch Kills",
   "clues": [
-   "Its street trees are unusually rich in Eastern Redbud.",
-   "Per square kilometre, it is in the bottom 10% of NYC's residential neighborhoods for rodent complaints.",
-   "Per square kilometre, it is in the bottom 20% of NYC's residential neighborhoods for street trees.",
+   "It is one of the 5 neighborhoods in NYC with the most Brazilian restaurants.",
+   "It is one of the 20 neighborhoods in NYC with the most hotels.",
+   "The median age is under 36.",
    "It is in Queens.",
-   "Landmarks here include: Herman A. and Malvina Schleicher House; Poppenhusen Institute; Queens Borough Public Library, Poppenhusen Branch."
+   "Subway lines serving it: E, F, M, N, R, W."
   ],
   "templates": [
-   "tree_signature",
-   "311:Rodent",
-   "street_trees",
+   "top5:cuisine:Brazilian",
+   "top20:count:hotels",
+   "demo_lo:median_age",
    "borough",
-   "landmark_name"
+   "subway_lines"
   ],
-  "clue1_matches": 2
+  "candidates_after_clue": [
+   6,
+   4,
+   2,
+   1,
+   1
+  ]
  },
  {
   "day": 17,
   "date": "2026-11-04",
-  "answer": "SI0104",
-  "answer_name": "West New Brighton-Silver Lake-Grymes Hill",
+  "answer": "BK0902",
+  "answer_name": "Prospect Lefferts Gardens-Wingate",
   "clues": [
-   "Per square kilometre, it is in the bottom 15% of NYC's residential neighborhoods for unleashed-dog complaints.",
-   "Per square kilometre, it is in the bottom 15% of NYC's residential neighborhoods for cannabis-retailer complaints.",
-   "Per square kilometre, it is in the bottom 10% of NYC's residential neighborhoods for restaurants.",
-   "It is in Staten Island.",
-   "Landmarks here include: 390 Van Duzer Street House; 69 Delafield Place House; Cornelius Cruser House."
+   "It is one of the 5 neighborhoods in NYC with the most Cornelian cherry street trees.",
+   "It is one of the 20 neighborhoods in NYC with the most illegal fireworks complaints per resident.",
+   "The largest racial/ethnic group is Black, at over 50% of residents.",
+   "It is in Brooklyn.",
+   "Subway lines serving it: 2, 5, B, Q, S."
   ],
   "templates": [
-   "311:Unleashed Dog",
-   "311:Cannabis Retailer",
-   "restaurants",
+   "top5:species:Cornelian cherry",
+   "top20:311:Illegal Fireworks",
+   "demo_group:Black",
    "borough",
-   "landmark_name"
+   "subway_lines"
   ],
-  "clue1_matches": 5
+  "candidates_after_clue": [
+   5,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 18,
   "date": "2026-11-05",
-  "answer": "MN0903",
-  "answer_name": "Hamilton Heights-Sugar Hill",
+  "answer": "BK1501",
+  "answer_name": "Gravesend (East)-Homecrest",
   "clues": [
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for house-of-worship noise complaints.",
-   "Per square kilometre, it has the 2nd-most illegal-fireworks complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for individually landmarked sites.",
-   "It is in Manhattan.",
-   "Subway lines serving it: 1, A, B, C, D."
+   "It is one of the 5 neighborhoods in NYC with the most Russian restaurants.",
+   "It is one of the 20 neighborhoods in NYC with the most parking meters.",
+   "More than 26% of residents are under 18.",
+   "It is in Brooklyn.",
+   "Subway lines serving it: F, N."
   ],
   "templates": [
-   "311:Noise - House of Worship",
-   "311:Illegal Fireworks",
-   "landmarks",
+   "top5:cuisine:Russian",
+   "top20:count:parking_meters",
+   "demo_hi:pct_under18",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 9
+  "candidates_after_clue": [
+   5,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 19,
   "date": "2026-11-06",
-  "answer": "BK1803",
-  "answer_name": "Canarsie",
+  "answer": "MN0303",
+  "answer_name": "East Village",
   "clues": [
-   "Its street trees are unusually rich in London Planetree.",
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for dead-animal reports.",
-   "Per square kilometre, it is in the bottom 25% of NYC's residential neighborhoods for street trees.",
-   "It is in Brooklyn.",
-   "Subway lines serving it: L."
+   "It is one of the 5 neighborhoods in NYC with the most Thai restaurants.",
+   "It is one of the 20 neighborhoods in NYC with the most hotels.",
+   "Fewer than 10% of residents are under 18.",
+   "It is in Manhattan.",
+   "Subway lines serving it: F, L."
   ],
   "templates": [
-   "tree_signature",
-   "311:Dead Animal",
-   "street_trees",
+   "top5:cuisine:Thai",
+   "top20:count:hotels",
+   "demo_lo:pct_under18",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 10
+  "candidates_after_clue": [
+   5,
+   4,
+   4,
+   4,
+   1
+  ]
  },
  {
   "day": 20,
   "date": "2026-11-07",
-  "answer": "SI0302",
-  "answer_name": "Great Kills-Eltingville",
+  "answer": "MN1101",
+  "answer_name": "East Harlem (South)",
   "clues": [
-   "Its street trees are unusually rich in Sweetgum.",
-   "Per square kilometre, it is in the bottom 15% of NYC's residential neighborhoods for public-drinking complaints.",
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for street trees.",
-   "It is in Staten Island.",
-   "Subway lines serving it: SIR."
+   "It is one of the 5 neighborhoods in NYC with the most farmers markets.",
+   "Per square kilometre, it is in the top 20% of NYC neighborhoods for landmarked buildings.",
+   "Over 85% of households have no car.",
+   "It is in Manhattan.",
+   "Landmarks here include: 28th Police Precinct Station House; Fire Engine Company No. 53; Lucy Dahlgren House."
   ],
   "templates": [
-   "tree_signature",
-   "311:Drinking",
-   "street_trees",
+   "top5:count:farmers_markets",
+   "densetop20:landmarks",
+   "demo_hi:pct_no_car",
    "borough",
-   "subway_lines"
+   "landmark_name"
   ],
-  "clue1_matches": 3
+  "candidates_after_clue": [
+   5,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 21,
   "date": "2026-11-08",
-  "answer": "BK1203",
-  "answer_name": "Kensington",
+  "answer": "BK1301",
+  "answer_name": "Gravesend (South)",
   "clues": [
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for pigeon-nuisance complaints.",
-   "Per square kilometre, it is in the top 20% of NYC's residential neighborhoods for rodent complaints.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for street trees.",
+   "It is in the bottom quartile of NYC neighborhoods for bike-parking racks, active garage & parking lot licenses and cultural organizations.",
+   "Per square kilometre, it is in the bottom 20% of NYC neighborhoods for restaurants.",
+   "The largest racial/ethnic group is non-Hispanic white, at over 45% of residents.",
    "It is in Brooklyn.",
-   "Subway lines serving it: F, G."
+   "Subway lines serving it: D, F."
   ],
   "templates": [
-   "311:Unsanitary Pigeon Condition",
-   "311:Rodent",
-   "street_trees",
+   "bottomq:count:bike_parking+count:cultural_orgs+license:Garage & Parking Lot",
+   "densebot20:restaurants",
+   "demo_group:White",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 9
+  "candidates_after_clue": [
+   10,
+   7,
+   5,
+   1,
+   1
+  ]
  },
  {
   "day": 22,
   "date": "2026-11-09",
-  "answer": "QN0707",
-  "answer_name": "Flushing-Willets Point",
+  "answer": "BK0801",
+  "answer_name": "Prospect Heights",
   "clues": [
-   "Its street trees are unusually rich in Pin Oak.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for mobile-food-vendor complaints.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for restaurants.",
-   "It is in Queens.",
-   "Subway lines serving it: 7."
+   "It is in the bottom quartile of NYC neighborhoods for hotels, bus shelters and active electronics store licenses.",
+   "It is one of the 20 neighborhoods in NYC with the most helicopter-noise complaints per resident.",
+   "The largest racial/ethnic group is non-Hispanic white, at over 55% of residents.",
+   "It is in Brooklyn.",
+   "Landmarks here include: Public School 9; Public School 9 Annex."
   ],
   "templates": [
-   "tree_signature",
-   "311:Mobile Food Vendor",
-   "restaurants",
+   "bottomq:count:bus_shelters+count:hotels+license:Electronics Store",
+   "top20:311:Noise - Helicopter",
+   "demo_group:White",
    "borough",
-   "subway_lines"
+   "landmark_name"
   ],
-  "clue1_matches": 6
+  "candidates_after_clue": [
+   12,
+   3,
+   3,
+   2,
+   1
+  ]
  },
  {
   "day": 23,
   "date": "2026-11-10",
-  "answer": "MN1001",
-  "answer_name": "Harlem (South)",
+  "answer": "QN0701",
+  "answer_name": "College Point",
   "clues": [
-   "Per square kilometre, it has the 2nd-most abandoned-bike reports of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 4th-most illegal-fireworks complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for individually landmarked sites.",
-   "It is in Manhattan.",
-   "Landmarks here include: Apollo Theater; Graham Court Apartments; Hotel Cecil & Minton's Playhouse Building."
+   "It is in the bottom quartile of NYC neighborhoods for parking meters, public Wi-Fi hotspots and cultural organizations.",
+   "Per square kilometre, it is in the bottom 20% of NYC neighborhoods for restaurants.",
+   "Over 50% of residents were born outside the US.",
+   "It is in Queens.",
+   "Landmarks here include: Herman A. and Malvina Schleicher House; Poppenhusen Institute; Queens Borough Public Library, Poppenhusen Branch."
   ],
   "templates": [
-   "311:Abandoned Bike",
-   "311:Illegal Fireworks",
-   "landmarks",
+   "bottomq:count:cultural_orgs+count:parking_meters+count:wifi_hotspots",
+   "densebot20:restaurants",
+   "demo_hi:pct_foreign_born",
    "borough",
    "landmark_name"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   10,
+   7,
+   2,
+   1,
+   1
+  ]
  },
  {
   "day": 24,
   "date": "2026-11-11",
-  "answer": "QN0202",
-  "answer_name": "Sunnyside",
+  "answer": "QN1001",
+  "answer_name": "South Ozone Park",
   "clues": [
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for helicopter noise complaints.",
-   "Per square kilometre, it is in the top 15% of NYC's residential neighborhoods for taxi complaints.",
-   "Per square kilometre, it is in the bottom 15% of NYC's residential neighborhoods for street trees.",
+   "It is one of the 5 neighborhoods in NYC with the most Caribbean restaurants.",
+   "It is one of the 20 neighborhoods in NYC with the most green ash street trees.",
+   "Over 55% of residents were born outside the US.",
    "It is in Queens.",
-   "Subway lines serving it: 7."
+   "Subway lines serving it: A."
   ],
   "templates": [
-   "311:Noise - Helicopter",
-   "311:Taxi Complaint",
-   "street_trees",
+   "top5:cuisine:Caribbean",
+   "top20:species:green ash",
+   "demo_hi:pct_foreign_born",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 8
+  "candidates_after_clue": [
+   5,
+   2,
+   1,
+   1,
+   1
+  ]
  },
  {
   "day": 25,
   "date": "2026-11-12",
-  "answer": "BK0702",
-  "answer_name": "Sunset Park (West)",
+  "answer": "BK0202",
+  "answer_name": "Downtown Brooklyn-DUMBO-Boerum Hill",
   "clues": [
-   "Its street trees are unusually rich in Chinese Elm.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for graffiti complaints.",
-   "Per square kilometre, it is in the bottom 15% of NYC's residential neighborhoods for street trees.",
+   "It is one of the 5 neighborhoods in NYC with the most German restaurants.",
+   "It is one of the 20 neighborhoods in NYC with the most individually landmarked buildings.",
+   "Over 75% of adults hold a bachelor's degree or higher.",
    "It is in Brooklyn.",
-   "Subway lines serving it: D, N, R."
+   "Subway lines serving it: 2, 3, 4, 5, A, B, C, F, G, Q, R."
   ],
   "templates": [
-   "tree_signature",
-   "311:Graffiti",
-   "street_trees",
+   "top5:cuisine:German",
+   "top20:landmarks",
+   "demo_hi:pct_ba",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 8
+  "candidates_after_clue": [
+   7,
+   3,
+   3,
+   1,
+   1
+  ]
  },
  {
   "day": 26,
   "date": "2026-11-13",
-  "answer": "BX0803",
-  "answer_name": "Riverdale-Spuyten Duyvil",
+  "answer": "SI0106",
+  "answer_name": "Port Richmond",
   "clues": [
-   "Its street trees are unusually rich in Northern Red Oak.",
-   "Per square kilometre, it is in the bottom 10% of NYC's residential neighborhoods for fire hydrants.",
-   "Per square kilometre, it has the 6th-fewest street trees of NYC's 197 residential neighborhoods.",
-   "It is in Bronx.",
-   "Landmarks here include: Alderbrook House; Anthony Campagna Estate; Christ Church."
+   "It is in the bottom quartile of NYC neighborhoods for parking meters, active garage & parking lot licenses and bus shelters.",
+   "It is one of the 20 neighborhoods in NYC with the most dead animal complaints per resident.",
+   "Fewer than 30% of commuters take public transit.",
+   "It is in Staten Island.",
+   "Landmarks here include: 121 Heberton Avenue House; 29 Cottage Place House; 752 Delafield Avenue."
   ],
   "templates": [
-   "tree_signature",
-   "hydrants",
-   "street_trees",
+   "bottomq:count:bus_shelters+count:parking_meters+license:Garage & Parking Lot",
+   "top20:311:Dead Animal",
+   "demo_lo:pct_transit",
    "borough",
    "landmark_name"
   ],
-  "clue1_matches": 8
+  "candidates_after_clue": [
+   13,
+   5,
+   5,
+   4,
+   1
+  ]
  },
  {
   "day": 27,
   "date": "2026-11-14",
-  "answer": "MN0604",
-  "answer_name": "East Midtown-Turtle Bay",
+  "answer": "QN0702",
+  "answer_name": "Whitestone-Beechhurst",
   "clues": [
-   "Per square kilometre, it has the 4th-most lost-property reports to 311 of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for mobile-food-vendor complaints.",
-   "Per square kilometre, it has the 3rd-most restaurants of NYC's 197 residential neighborhoods.",
-   "It is in Manhattan.",
-   "Subway lines serving it: 4, 5, 6, 7, E, F, S."
+   "It is in the bottom quartile of NYC neighborhoods for public Wi-Fi hotspots, hotels and active electronics store licenses.",
+   "Per square kilometre, it is in the bottom 20% of NYC neighborhoods for restaurants.",
+   "Fewer than 30% of households rent.",
+   "It is in Queens.",
+   "Landmarks here include: Arthur and Dorothy Dalton Hammerstein House, Wildflower."
   ],
   "templates": [
-   "311:Lost Property",
-   "311:Mobile Food Vendor",
-   "restaurants",
+   "bottomq:count:hotels+count:wifi_hotspots+license:Electronics Store",
+   "densebot20:restaurants",
+   "demo_lo:pct_renter",
    "borough",
-   "subway_lines"
+   "landmark_name"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   6,
+   4,
+   4,
+   4,
+   1
+  ]
  },
  {
   "day": 28,
   "date": "2026-11-15",
-  "answer": "BK0401",
-  "answer_name": "Bushwick (West)",
+  "answer": "MN0201",
+  "answer_name": "SoHo-Little Italy-Hudson Square",
   "clues": [
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for public-urination complaints.",
-   "Per square kilometre, it has more rodent inspections that failed for rat activity than any other residential neighborhood in NYC.",
-   "Per square kilometre, it is in the top 10% of NYC's residential neighborhoods for street trees.",
-   "It is in Brooklyn.",
-   "Subway lines serving it: J, L, M."
+   "It is one of the 5 neighborhoods in NYC with the most hotels.",
+   "It is one of the 20 neighborhoods in NYC with the most individually landmarked buildings.",
+   "Median household income is over $140,000.",
+   "It is in Manhattan.",
+   "Subway lines serving it: 1, 6, C, E, J, N, Q, R, W, Z."
   ],
   "templates": [
-   "311:Urinating in Public",
-   "rat_signs",
-   "street_trees",
+   "top5:count:hotels",
+   "top20:landmarks",
+   "demo_hi:median_income_k",
    "borough",
    "subway_lines"
   ],
-  "clue1_matches": 6
+  "candidates_after_clue": [
+   5,
+   4,
+   4,
+   4,
+   1
+  ]
  },
  {
   "day": 29,
   "date": "2026-11-16",
-  "answer": "MN0602",
-  "answer_name": "Gramercy",
+  "answer": "QN1403",
+  "answer_name": "Breezy Point-Belle Harbor-Rockaway Park-Broad Channel",
   "clues": [
-   "Per square kilometre, it has the 6th-most abandoned-bike reports of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 5th-most outdoor-dining complaints of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 7th-most individually landmarked sites of NYC's 197 residential neighborhoods.",
-   "It is in Manhattan.",
-   "Subway lines serving it: L."
+   "It is in the bottom quartile of NYC neighborhoods for cultural organizations, bus shelters and active electronics store licenses.",
+   "Per square kilometre, it is in the bottom 20% of NYC neighborhoods for restaurants.",
+   "Fewer than 25% of commuters take public transit.",
+   "It is in Queens.",
+   "Landmarks here include: Firehouse, Engine Company 268 and Hook & Ladder Company 137."
   ],
   "templates": [
-   "311:Abandoned Bike",
-   "311:Outdoor Dining",
-   "landmarks",
+   "bottomq:count:bus_shelters+count:cultural_orgs+license:Electronics Store",
+   "densebot20:restaurants",
+   "demo_lo:pct_transit",
    "borough",
-   "subway_lines"
+   "landmark_name"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   13,
+   8,
+   5,
+   3,
+   1
+  ]
  },
  {
   "day": 30,
   "date": "2026-11-17",
-  "answer": "SI0303",
-  "answer_name": "Arden Heights-Rossville",
+  "answer": "BK1803",
+  "answer_name": "Canarsie",
   "clues": [
-   "Its street trees are unusually rich in Amur Maple.",
-   "Per square kilometre, it has the 9th-fewest fire hydrants of NYC's 197 residential neighborhoods.",
-   "Per square kilometre, it has the 5th-fewest restaurants of NYC's 197 residential neighborhoods.",
-   "It is in Staten Island.",
-   "Landmarks here include: Woodrow United Methodist Church."
+   "It is one of the 5 neighborhoods in NYC with the most London planetree street trees.",
+   "It is one of the 20 neighborhoods in NYC with the most Caribbean restaurants.",
+   "Fewer than 5% of commuters walk to work.",
+   "It is in Brooklyn.",
+   "Subway lines serving it: L."
   ],
   "templates": [
-   "tree_signature",
-   "hydrants",
-   "restaurants",
+   "top5:species:London planetree",
+   "top20:cuisine:Caribbean",
+   "demo_lo:pct_walk",
    "borough",
-   "landmark_name"
+   "subway_lines"
   ],
-  "clue1_matches": 1
+  "candidates_after_clue": [
+   5,
+   2,
+   2,
+   2,
+   1
+  ]
  }
 ]
