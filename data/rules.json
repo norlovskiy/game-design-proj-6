@@ -1,0 +1,7 @@
+{
+  "data_version": 1,
+  "limits": {"3": 8, "4": 4, "5": 2},
+  "min_after_clue1": 3,
+  "min_after_clue2": 2,
+  "family_limited": ["species", "cuisine", "license", "311"]
+}

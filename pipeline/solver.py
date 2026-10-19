@@ -14,9 +14,11 @@ from pathlib import Path
 DATA = Path(__file__).resolve().parent.parent / "data"
 CLUES = json.loads((DATA / "clues.json").read_text())
 
-PER_TIER = 6          # candidate clues per tier considered when enumerating combos
+# Acceptance rules are shared with the browser generator (web/endless.js) through data/rules.json.
+RULES = json.loads((DATA / "rules.json").read_text())
+PER_TIER = 6          # candidate clues per tier considered when enumerating combos (daily schedule)
 # acceptance limits on the profile (candidates remaining after clue k)
-LIMITS = {3: 8, 4: 4, 5: 2}
+LIMITS = {int(k): v for k, v in RULES["limits"].items()}
 
 
 def metric_keys(template):
@@ -29,7 +31,7 @@ def metric_keys(template):
     return {rest or head}
 
 
-FAMILY_LIMITED = ("species", "cuisine", "license", "311")   # at most one clue per puzzle from each of these
+FAMILY_LIMITED = tuple(RULES["family_limited"])   # at most one clue per puzzle from each of these
 
 
 def families(template):
@@ -56,7 +58,7 @@ def acceptable(sizes):
     ok = all(sizes[k - 1] <= lim for k, lim in LIMITS.items())
     informative = sizes[0] > sizes[1] and sizes[1] >= sizes[2] and sizes[2] >= sizes[3]   # clue 2 must add information
     # not pinned down before clue 3: later clues must still matter
-    return ok and informative and sizes[0] >= 3 and sizes[1] >= 2
+    return ok and informative and sizes[0] >= RULES["min_after_clue1"] and sizes[1] >= RULES["min_after_clue2"]
 
 
 def combos(nta, per_tier=PER_TIER):

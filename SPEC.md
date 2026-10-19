@@ -89,3 +89,46 @@ Every clue carries the exact set of neighborhoods it is true for. `pipeline/solv
 
 - Game name and visual style are decided at build time.
 - Launch is the day after this spec. The pipeline, a first batch of vetted puzzles, and the itch.io test are the critical path. Launching with a short schedule (say 2 to 4 weeks) and extending it later fits the "run manually" pipeline.
+
+## 6. Endless mode
+
+A second mode beside the daily puzzle: unlimited puzzles, same format (5 clues across the same five tiers, 5 guesses, same map UI and distance-gradient feedback). Daily stays the default and is the only mode that touches the daily streak and puzzle number.
+
+### Generation (client-side)
+- Puzzles are compiled in the browser from the shipped clue data (`clues.json`, trimmed for the bundle: match sets stored as index lists, unused fields dropped). No precomputed bank.
+- Algorithm: pick a neighborhood uniformly from those with at least one valid combo, then choose one clue per tier by randomized depth-first search, weighting each candidate clue by `quality^2` (no hard quality floor). Dead end means backtrack, then reroll the neighborhood. Never loop on a neighborhood with no valid combo; the viable list is computed up front.
+- Hard constraints, the same as the daily solver: candidates remaining after clues 3, 4 and 5 are at most 8, 4 and 2; clue 2 must add information; no metric used twice; at most one clue per puzzle from the limited families (species, cuisine, license, 311).
+- These rules live in one shipped config read by both `pipeline/solver.py` and the JS generator. A test runs the JS generator against the Python solver on fixed seeds and checks the outputs agree.
+- No per-puzzle spoiler or ambiguity review. Endless puzzles are not the vetted daily set.
+- Coverage: the build exhausts the solver's search (no per-tier cap) and ships only neighborhoods with an acceptable combo, and only clues used by some acceptable combo: 126 of 197 neighborhoods, about 110 KB. The rest never appear in endless mode (they stay clickable on the map).
+- One difficulty. Limits stay parameterized so a selector can be added later.
+
+### Seeds and codes
+- Generation is deterministic per seed for a given data version.
+- A puzzle code is `<data version>-<seed>`, for example `2-K7QM2X`, using an alphabet without ambiguous characters (no 0/O, 1/I). Only the latest data ships. A code from another version shows "This puzzle is from an older version of the game". A malformed code shows an error. Either way the current puzzle is left untouched.
+- Entry: a "Play a code" field behind a link in the Endless view. It accepts a pasted code or a full share text, and the client extracts the code with a regex. No URL parameters (the itch.io iframe breaks them).
+- A code puzzle counts toward played/won but not the streak, and may be replayed. It bypasses the "hide today's daily" rule below, but warns if its answer is today's unplayed daily: "This puzzle's answer is also today's daily. Play it anyway?"
+
+- Starting a code puzzle while an endless puzzle has guesses but is unfinished counts the abandoned one as a loss; with no guesses it is discarded.
+
+### Interaction with the daily
+- Endless never uses a clue set identical to any daily puzzle's.
+- Until today's daily is finished, endless does not pick today's daily neighborhood.
+- Repeat avoidance: the client avoids the neighborhoods and clue combos of the last 20 endless puzzles (kept in `localStorage`). This is done by rerolling the seed when a new puzzle is picked. It never changes what a given seed produces.
+
+### UI and flow
+- A Daily | Endless toggle always visible in the header.
+- After a win or loss, a "Next puzzle" button. "Skip" is available mid-game; it counts as a loss and reveals the answer like a normal loss.
+- The code is shown on the end screen next to the share button.
+- Record line on the endless end screen, for example "Won 14 of 20 · streak 3 · best 7". No stats screen; the guess distribution is stored for a later one.
+
+### Persistence
+- All access follows the existing `localStorage` rules (try/catch, in-memory fallback).
+- The in-progress endless puzzle (seed, guesses) resumes on refresh, so refreshing cannot reroll a puzzle.
+- The endless record is stored separately from the daily streak: played, won, guess distribution, current streak and best streak. Code puzzles count toward played and won only.
+
+### Sharing
+- Emoji card (`Hood Guesser Endless <code> 3/5` then one tile per guess, padded with ⬛) using the daily legend (🟨 <3 km, 🟧 <10 km, 🟥 farther, 🟩 correct, ⬛ unused), with the code and no puzzle number, for example `Hood Guesser Endless 2-K7QM2X 🟨🟧🟩`. Same Clipboard API and selectable-text fallback as daily.
+
+### Credits
+- Unchanged: the credits screen already names every dataset.

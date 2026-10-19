@@ -56,6 +56,16 @@
   dialog { background: var(--panel); color: var(--ink); border: 1px solid var(--muted); border-radius: 12px; max-width: 520px; width: calc(100% - 32px); }
   dialog::backdrop { background: rgba(0,0,0,.6); }
   dialog h2 { margin-top: 0; } dialog ul { padding-left: 18px; }
+  #modebar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .seg { display: inline-flex; border: 1px solid var(--muted); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; background: transparent; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #1c1403; font-weight: 600; }
+  button.link { border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 6px 4px; }
+  #codeIn { width: 100%; font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--muted); border-radius: 8px; padding: 8px; }
+  #codeMsg { min-height: 1.4em; color: var(--muted); }
+  #codeMsg.err { color: var(--wrong); }
+  #result .rec { color: var(--muted); margin: 4px 0; }
+  #result .row { display: flex; gap: 8px; flex-wrap: wrap; }
   .banner { text-align: center; padding: 40px 12px; color: var(--muted); }
 </style>
 </head>
@@ -65,19 +75,38 @@
     <div><h1>Hood Guesser</h1><div class="meta" id="meta"></div></div>
     <div><button id="help" aria-label="About and credits">?</button></div>
   </header>
+  <div id="modebar">
+    <div class="seg" role="group" aria-label="Game mode">
+      <button id="mDaily" aria-pressed="true">Daily</button><button id="mEndless" aria-pressed="false">Endless</button>
+    </div>
+    <button class="link" id="codeBtn" style="display:none">Play a code</button>
+  </div>
+  <div id="banner" class="banner" style="display:none"></div>
   <ol id="clues"></ol>
   <ul id="guesses" aria-label="Your guesses"></ul>
   <div id="mapwrap">
     <svg id="map" role="img" aria-label="Map of New York City neighborhoods. Select one to guess."></svg>
     <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" aria-label="Reset view" style="font-size:13px">&#8634;</button></div>
   </div>
-  <div id="bar"><div id="sel">Tap a neighborhood on the map.</div><button class="primary" id="confirm" disabled>Guess</button></div>
+  <div id="bar"><div id="sel">Tap a neighborhood on the map.</div><button id="skip" style="display:none">Skip</button><button class="primary" id="confirm" disabled>Guess</button></div>
   <div id="result"></div>
 </div>
 
+<dialog id="codeDlg">
+  <h2>Play a code</h2>
+  <form id="codeForm">
+    <p>Paste a puzzle code, or a whole shared result, from a friend's Endless game.</p>
+    <input id="codeIn" autocomplete="off" spellcheck="false" placeholder="1-ABC234" aria-label="Puzzle code">
+    <p id="codeMsg" role="status"></p>
+    <div class="row" style="display:flex;gap:8px">
+      <button class="primary" id="codeGo" type="submit">Play</button><button type="button" id="codeCancel">Cancel</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="about">
   <h2>How to play</h2>
-  <p>Guess the NYC neighborhood from clues drawn from NYC Open Data. You get 5 guesses; each wrong guess reveals another clue. There is one puzzle a day, resetting at midnight New York time.</p>
+  <p>Guess the NYC neighborhood from clues drawn from NYC Open Data. You get 5 guesses; each wrong guess reveals another clue. There is one daily puzzle, resetting at midnight New York time. Endless mode gives you as many extra puzzles as you like, each with a shareable code; skipping one counts as a loss.</p>
   <p>Wrong guesses are coloured from warm (close to the answer) to cold (far away), with the distance between neighborhood centres shown.</p>
   <p>Neighborhoods are the city's 2020 Neighborhood Tabulation Areas. Clues about "per square kilometre" rankings compare the 197 residential ones.</p>
   <h2>Data credits</h2>
@@ -101,7 +130,10 @@
 const SHAPES = /*SHAPES*/[];
 const SCHEDULE_B64 = "/*SCHEDULE*/";
 const LAUNCH = "/*LAUNCH*/";
+const ENDLESS_DATA = /*ENDLESS*/null;
+/*ENDLESS_JS*/
 const KEY = "nyc-hoods", MAX = 5, BORO = { Brooklyn: "BK", Bronx: "BX", Manhattan: "MN", Queens: "QN", "Staten Island": "SI" };
+const RECENT_N = 20;
 
 // ---------- storage (localStorage may throw in iframes; fall back to memory) ----------
 const mem = {};
@@ -111,6 +143,15 @@ const store = {
 };
 function load() { try { return JSON.parse(store.get("hoodguesser") || "{}"); } catch (e) { return {}; } }
 function save(s) { store.set("hoodguesser", JSON.stringify(s)); }
+function loadEndless() {
+  let e = {};
+  try { e = JSON.parse(store.get("hoodguesser_endless") || "{}"); } catch (err) { e = {}; }
+  e.cur = e.cur || null;
+  e.recent = e.recent || [];
+  e.record = Object.assign({ played: 0, won: 0, dist: [0, 0, 0, 0, 0], streak: 0, best: 0 }, e.record);
+  return e;
+}
+const saveEndless = () => store.set("hoodguesser_endless", JSON.stringify(es));
 
 // ---------- today's puzzle ----------
 function nyDate() {
@@ -129,200 +170,350 @@ const params = new URLSearchParams(location.search);
 const today = params.get("date") || window.TEST_DATE || nyDate();   // ?date=YYYY-MM-DD is handy for testing
 const num = dayNum(today);
 const puzzles = decode();
-const puzzle = puzzles.find(p => p.day === num);
+const dailyPuzzle = puzzles.find(p => p.day === num);
+const dailyClueSets = new Set(puzzles.map(p => p.clues.join("\n")));
 let state = load();
 state.results = state.results || {};
 state.streak = state.streak || 0;
+const dailyDone = () => !!(state.results[num] && state.results[num].done);
 
-if (!puzzle) {
-  $("clues").style.display = $("mapwrap").style.display = $("bar").style.display = "none";
-  const b = document.createElement("div");
-  b.className = "banner";
-  b.textContent = num < 1 ? `Hood Guesser launches on ${LAUNCH}. See you then!` : "No puzzle scheduled for today yet. Check back soon!";
-  $("app").appendChild(b);
-} else start();
+const gen = Endless.create(ENDLESS_DATA);
+let es = loadEndless();
 
-function start() {
-  const rec = state.results[num] || { guesses: [], done: false, won: false };
-  state.results[num] = rec;
-  let selected = null;
-
-  $("meta").textContent = `Puzzle #${num} · streak ${state.streak}`;
-
-  // ----- map -----
-  const svg = $("map"), NS = "http://www.w3.org/2000/svg";
-  const bounds = { x: 0, y: 0, w: 1, h: 1 };
-  const g = document.createElementNS(NS, "g");
-  svg.appendChild(g);
-  const els = {};
-  let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
-  for (const s of SHAPES) {
-    const p = document.createElementNS(NS, "path");
-    p.setAttribute("d", s.d);
-    p.setAttribute("class", "hood " + BORO[s.boro]);
-    p.dataset.id = s.id;
-    g.appendChild(p);
-    els[s.id] = p;
+// ---------- map ----------
+const svg = $("map"), NS = "http://www.w3.org/2000/svg";
+const bounds = { x: 0, y: 0, w: 1, h: 1 };
+const g = document.createElementNS(NS, "g");
+svg.appendChild(g);
+const els = {};
+for (const s of SHAPES) {
+  const p = document.createElementNS(NS, "path");
+  p.setAttribute("d", s.d);
+  p.setAttribute("class", "hood " + BORO[s.boro]);
+  p.dataset.id = s.id;
+  g.appendChild(p);
+  els[s.id] = p;
+}
+let view = { ...bounds };
+const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
+function fit() {
+  const r = svg.getBoundingClientRect(), ar = r.width / r.height;
+  if (!(ar > 0)) return;   // board hidden
+  view = { ...bounds };
+  if (bounds.w / bounds.h < ar) { view.w = bounds.h * ar; view.x = bounds.x - (view.w - bounds.w) / 2; }
+  else { view.h = bounds.w / ar; view.y = bounds.y - (view.h - bounds.h) / 2; }
+  apply();
+}
+function zoomAt(f, cx, cy) {   // cx, cy in svg units
+  const nw = Math.min(Math.max(view.w * f, bounds.w / 40), bounds.w * 1.5), k = nw / view.w;
+  view = { x: cx - (cx - view.x) * k, y: cy - (cy - view.y) * k, w: nw, h: view.h * k };
+  apply();
+}
+const toSvg = (px, py) => { const r = svg.getBoundingClientRect(); return [view.x + (px - r.left) / r.width * view.w, view.y + (py - r.top) / r.height * view.h]; };
+svg.addEventListener("wheel", e => { e.preventDefault(); zoomAt(e.deltaY < 0 ? 0.8 : 1.25, ...toSvg(e.clientX, e.clientY)); }, { passive: false });
+const ptrs = new Map(); let moved = 0, pinch = 0;
+svg.addEventListener("pointerdown", e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 1) moved = 0; });
+svg.addEventListener("pointermove", e => {
+  if (!ptrs.has(e.pointerId)) return;
+  const [ox, oy] = ptrs.get(e.pointerId);
+  ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (pinch) zoomAt(pinch / d, ...toSvg((a[0] + b[0]) / 2, (a[1] + b[1]) / 2));
+    pinch = d; moved = 99;
+  } else {
+    moved += Math.abs(e.clientX - ox) + Math.abs(e.clientY - oy);
+    const r = svg.getBoundingClientRect();
+    view.x -= (e.clientX - ox) / r.width * view.w; view.y -= (e.clientY - oy) / r.height * view.h; apply();
   }
+});
+const up = e => { ptrs.delete(e.pointerId); pinch = 0; };
+svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
+svg.addEventListener("click", e => {
+  if (moved > 6 || !G || G.rec.done) return;
+  const t = document.elementFromPoint(e.clientX, e.clientY);   // pointer capture retargets e.target to the svg
+  const id = t && t.dataset && t.dataset.id;
+  if (id) select(id);
+});
+$("zin").onclick = () => zoomAt(0.7, view.x + view.w / 2, view.y + view.h / 2);
+$("zout").onclick = () => zoomAt(1.4, view.x + view.w / 2, view.y + view.h / 2);
+$("zfit").onclick = fit;
+addEventListener("resize", fit);
+{
   const bb = g.getBBox();
   Object.assign(bounds, { x: bb.x - 2000, y: bb.y - 2000, w: bb.width + 4000, h: bb.height + 4000 });
-  let view = { ...bounds };
-  const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
-  function fit() {
-    const r = svg.getBoundingClientRect(), ar = r.width / r.height;
-    view = { ...bounds };
-    if (bounds.w / bounds.h < ar) { view.w = bounds.h * ar; view.x = bounds.x - (view.w - bounds.w) / 2; }
-    else { view.h = bounds.w / ar; view.y = bounds.y - (view.h - bounds.h) / 2; }
-    apply();
-  }
-  function zoomAt(f, cx, cy) {   // cx, cy in svg units
-    const nw = Math.min(Math.max(view.w * f, bounds.w / 40), bounds.w * 1.5), k = nw / view.w;
-    view = { x: cx - (cx - view.x) * k, y: cy - (cy - view.y) * k, w: nw, h: view.h * k };
-    apply();
-  }
-  const toSvg = (px, py) => { const r = svg.getBoundingClientRect(); return [view.x + (px - r.left) / r.width * view.w, view.y + (py - r.top) / r.height * view.h]; };
-  svg.addEventListener("wheel", e => { e.preventDefault(); zoomAt(e.deltaY < 0 ? 0.8 : 1.25, ...toSvg(e.clientX, e.clientY)); }, { passive: false });
-  const ptrs = new Map(); let moved = 0, pinch = 0;
-  svg.addEventListener("pointerdown", e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); if (ptrs.size === 1) moved = 0; });
-  svg.addEventListener("pointermove", e => {
-    if (!ptrs.has(e.pointerId)) return;
-    const [ox, oy] = ptrs.get(e.pointerId);
-    ptrs.set(e.pointerId, [e.clientX, e.clientY]);
-    if (ptrs.size === 2) {
-      const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-      if (pinch) zoomAt(pinch / d, ...toSvg((a[0] + b[0]) / 2, (a[1] + b[1]) / 2));
-      pinch = d; moved = 99;
-    } else {
-      moved += Math.abs(e.clientX - ox) + Math.abs(e.clientY - oy);
-      const r = svg.getBoundingClientRect();
-      view.x -= (e.clientX - ox) / r.width * view.w; view.y -= (e.clientY - oy) / r.height * view.h; apply();
-    }
-  });
-  const up = e => { ptrs.delete(e.pointerId); pinch = 0; };
-  svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
-  svg.addEventListener("click", e => {
-    if (moved > 6 || rec.done) return;
-    const t = document.elementFromPoint(e.clientX, e.clientY);   // pointer capture retargets e.target to the svg
-    const id = t && t.dataset && t.dataset.id;
-    if (id) select(id);
-  });
-  $("zin").onclick = () => zoomAt(0.7, view.x + view.w / 2, view.y + view.h / 2);
-  $("zout").onclick = () => zoomAt(1.4, view.x + view.w / 2, view.y + view.h / 2);
-  $("zfit").onclick = fit;
-  addEventListener("resize", fit);
   fit();
+}
 
-  // ----- distance feedback -----
-  const KM_PER_UNIT = 111 / 100000;   // build.py projects 100000 units per degree of latitude
-  const distKm = id => Math.hypot(byId[id].c[0] - byId[puzzle.answer].c[0], byId[id].c[1] - byId[puzzle.answer].c[1]) * KM_PER_UNIT;
-  const STOPS = [[217, 60, 40], [236, 190, 110], [60, 105, 175]];   // close red -> mid tan -> far blue; no green, which means "correct"
-  const heat = km => {
-    const t = Math.min(km / 30, 1) * 2, i = Math.min(Math.floor(t), 1), f = t - i;
-    return `rgb(${STOPS[i].map((v, k) => Math.round(v + (STOPS[i + 1][k] - v) * f)).join(",")})`;
-  };
-  const tile = km => km < 3 ? "\ud83d\udfe8" : km < 10 ? "\ud83d\udfe7" : "\ud83d\udfe5";
-  function markWrong(id) {
-    els[id].classList.add("wrong");
-    els[id].style.fill = heat(distKm(id));
+// ---------- the game on screen ----------
+// G = { mode, puzzle: {answer, clues, photos: {i: {src, credit}}}, rec: {guesses, done, won}, save(), recordEnd(), shareText(), extras(el) }
+let G = null, selected = null;
+
+const KM_PER_UNIT = 111 / 100000;   // build.py projects 100000 units per degree of latitude
+const distKm = id => Math.hypot(byId[id].c[0] - byId[G.puzzle.answer].c[0], byId[id].c[1] - byId[G.puzzle.answer].c[1]) * KM_PER_UNIT;
+const STOPS = [[217, 60, 40], [236, 190, 110], [60, 105, 175]];   // close red -> mid tan -> far blue; no green, which means "correct"
+const heat = km => {
+  const t = Math.min(km / 30, 1) * 2, i = Math.min(Math.floor(t), 1), f = t - i;
+  return `rgb(${STOPS[i].map((v, k) => Math.round(v + (STOPS[i + 1][k] - v) * f)).join(",")})`;
+};
+const tile = km => km < 3 ? "🟨" : km < 10 ? "🟧" : "🟥";
+function markWrong(id) {
+  els[id].classList.add("wrong");
+  els[id].style.fill = heat(distKm(id));
+}
+function renderGuesses() {
+  $("guesses").innerHTML = "";
+  for (const id of G.rec.guesses) {
+    if (id === G.puzzle.answer) continue;
+    const li = document.createElement("li");
+    const km = distKm(id);
+    li.style.borderLeftColor = heat(km);
+    const mi = km * 0.621371;
+    li.textContent = `${byId[id].name} · ${km < 0.1 ? "<0.1" : km.toFixed(1)} km, ${mi < 0.06 ? "<0.06" : mi.toFixed(mi < 1 ? 2 : 1)} mi away`;
+    $("guesses").appendChild(li);
   }
-  function renderGuesses() {
-    $("guesses").innerHTML = "";
-    for (const id of rec.guesses) {
-      if (id === puzzle.answer) continue;
-      const li = document.createElement("li");
-      const km = distKm(id);
-      li.style.borderLeftColor = heat(km);
-      const mi = km * 0.621371;
-      li.textContent = `${byId[id].name} \u00b7 ${km < 0.1 ? "<0.1" : km.toFixed(1)} km, ${mi < 0.06 ? "<0.06" : mi.toFixed(mi < 1 ? 2 : 1)} mi away`;
-      $("guesses").appendChild(li);
+}
+function renderClues() {
+  const { puzzle, rec } = G;
+  const shown = rec.done ? puzzle.clues.length : Math.min(rec.guesses.length + 1, puzzle.clues.length);
+  $("clues").innerHTML = "";
+  puzzle.clues.forEach((c, i) => {
+    const li = document.createElement("li");
+    if (i >= shown) li.className = "locked";
+    li.innerHTML = `<span class="n">${i + 1}</span><div class="body"><span class="text"></span></div>`;
+    li.querySelector(".text").textContent = i < shown ? c : "Locked — a wrong guess reveals it.";
+    const photo = puzzle.photos && puzzle.photos[i];
+    if (photo && i < shown) {   // photos load only once their clue is revealed
+      const fig = document.createElement("figure"), img = document.createElement("img"), cap = document.createElement("figcaption");
+      img.src = photo.src; img.alt = "Photo for this clue"; img.loading = "lazy";
+      img.onerror = () => fig.remove();
+      cap.textContent = "Photo: " + photo.credit;
+      fig.append(img, cap);
+      li.querySelector(".body").appendChild(fig);
     }
-  }
-
-  // ----- clues & guesses -----
-  function renderClues() {
-    const shown = rec.done ? puzzle.clues.length : Math.min(rec.guesses.length + 1, puzzle.clues.length);
-    $("clues").innerHTML = "";
-    puzzle.clues.forEach((c, i) => {
-      const li = document.createElement("li");
-      if (i >= shown) li.className = "locked";
-      li.innerHTML = `<span class="n">${i + 1}</span><div class="body"><span class="text"></span></div>`;
-      li.querySelector(".text").textContent = i < shown ? c : "Locked — a wrong guess reveals it.";
-      const photo = puzzle.photos && puzzle.photos[i];
-      if (photo && i < shown) {   // photos load only once their clue is revealed
-        const fig = document.createElement("figure"), img = document.createElement("img"), cap = document.createElement("figcaption");
-        img.src = photo.src; img.alt = "Photo for this clue"; img.loading = "lazy";
-        img.onerror = () => fig.remove();
-        cap.textContent = "Photo: " + photo.credit;
-        fig.append(img, cap);
-        li.querySelector(".body").appendChild(fig);
-      }
-      $("clues").appendChild(li);
-    });
-  }
-  function select(id) {
-    if (rec.guesses.includes(id)) return;
-    if (selected) els[selected].classList.remove("sel");
-    selected = id; els[id].classList.add("sel");
-    $("sel").innerHTML = `Selected: <b></b>`;
-    $("sel").firstElementChild.textContent = byId[id].name;
-    $("confirm").disabled = false;
-  }
-  function shareText() {
-    const row = rec.guesses.map((g, i) => (rec.won && i === rec.guesses.length - 1) ? "🟩" : "🟥");
-    while (row.length < MAX) row.push("⬛");
-    return `Hood Guesser #${num} ${rec.won ? rec.guesses.length : "X"}/${MAX}\n${row.join("")}`;
-  }
-  function finish() {
-    $("bar").style.display = "none";
-    els[puzzle.answer].classList.remove("sel", "wrong");
-    els[puzzle.answer].classList.add("right");
-    renderClues();
-    const r = $("result");
-    r.style.display = "block";
-    r.innerHTML = `<h2></h2><pre></pre><button class="primary" id="copy">Copy result</button><textarea id="share" rows="3" readonly></textarea>`;
-    r.querySelector("h2").textContent = rec.won ? `Correct! ${byId[puzzle.answer].name}` : `It was ${byId[puzzle.answer].name}`;
-    r.querySelector("pre").textContent = shareText() + `\nStreak: ${state.streak}`;
-    const t = shareText();
-    $("copy").onclick = async () => {
-      try { await navigator.clipboard.writeText(t); $("copy").textContent = "Copied!"; }
-      catch (e) { const ta = $("share"); ta.style.display = "block"; ta.value = t; ta.select(); }
-    };
-    // zoom to the answer so the loser sees where it was
-    const bb2 = els[puzzle.answer].getBBox();
-    const k = 6000, cx = bb2.x + bb2.width / 2, cy = bb2.y + bb2.height / 2;
-    view = { x: cx - k, y: cy - k * view.h / view.w, w: k * 2, h: k * 2 * view.h / view.w }; apply();
-  }
-  function recordEnd() {
-    rec.done = true;
-    const prev = Object.keys(state.results).map(Number).filter(d => d < num && state.results[d].done).sort((a, b) => b - a)[0];
-    state.streak = rec.won ? ((prev === num - 1 && state.results[prev].won) ? state.streak : 0) + 1 : 0;
-  }
-  $("confirm").onclick = () => {
-    if (!selected || rec.done) return;
-    rec.guesses.push(selected);
-    els[selected].classList.remove("sel");
-    const id = selected; selected = null;
-    $("confirm").disabled = true;
-    $("sel").textContent = "Tap a neighborhood on the map.";
-    if (id === puzzle.answer) { rec.won = true; recordEnd(); }
-    else {
-      markWrong(id);
-      if (rec.guesses.length >= MAX) recordEnd();
-    }
-    save(state);
-    $("meta").textContent = `Puzzle #${num} · streak ${state.streak}`;
-    renderClues();
-    renderGuesses();
-    if (rec.done) finish();
+    $("clues").appendChild(li);
+  });
+}
+function select(id) {
+  if (G.rec.guesses.includes(id)) return;
+  if (selected) els[selected].classList.remove("sel");
+  selected = id; els[id].classList.add("sel");
+  $("sel").innerHTML = `Selected: <b></b>`;
+  $("sel").firstElementChild.textContent = byId[id].name;
+  $("confirm").disabled = false;
+}
+function finish() {
+  $("bar").style.display = "none";
+  const { puzzle, rec } = G;
+  els[puzzle.answer].classList.remove("sel", "wrong");
+  els[puzzle.answer].classList.add("right");
+  renderClues();
+  const r = $("result");
+  r.style.display = "block";
+  r.innerHTML = `<h2></h2><pre></pre><div class="extras"></div><div class="row"><button class="primary" id="copy">Copy result</button></div><textarea id="share" rows="3" readonly></textarea>`;
+  r.querySelector("h2").textContent = rec.won ? `Correct! ${byId[puzzle.answer].name}` : `${rec.skipped ? "Skipped. " : ""}It was ${byId[puzzle.answer].name}`;
+  const t = G.shareText();
+  r.querySelector("pre").textContent = t;
+  G.extras(r.querySelector(".extras"), r.querySelector(".row"));
+  $("copy").onclick = async () => {
+    try { await navigator.clipboard.writeText(t); $("copy").textContent = "Copied!"; }
+    catch (e) { const ta = $("share"); ta.style.display = "block"; ta.value = t; ta.select(); }
   };
-  $("help").onclick = () => $("about").showModal();
+  // zoom to the answer so the loser sees where it was
+  const bb2 = els[puzzle.answer].getBBox();
+  const k = 6000, cx = bb2.x + bb2.width / 2, cy = bb2.y + bb2.height / 2;
+  view = { x: cx - k, y: cy - k * view.h / view.w, w: k * 2, h: k * 2 * view.h / view.w }; apply();
+}
+$("confirm").onclick = () => {
+  if (!selected || G.rec.done) return;
+  const { puzzle, rec } = G;
+  rec.guesses.push(selected);
+  els[selected].classList.remove("sel");
+  const id = selected; selected = null;
+  $("confirm").disabled = true;
+  $("sel").textContent = "Tap a neighborhood on the map.";
+  if (id === puzzle.answer) { rec.won = true; G.recordEnd(); }
+  else {
+    markWrong(id);
+    if (rec.guesses.length >= MAX) G.recordEnd();
+  }
+  G.save();
+  G.header();
+  renderClues();
+  renderGuesses();
+  if (rec.done) finish();
+};
+$("help").onclick = () => $("about").showModal();
 
-  // restore saved progress
+function resetBoard() {   // clear everything the previous puzzle left on screen
+  selected = null;
+  for (const s of SHAPES) { els[s.id].setAttribute("class", "hood " + BORO[s.boro]); els[s.id].style.fill = ""; }
+  $("sel").textContent = "Tap a neighborhood on the map.";
+  $("confirm").disabled = true;
+  $("skip").textContent = "Skip";
+  $("result").style.display = "none";
+  $("guesses").innerHTML = "";
+  $("bar").style.display = "flex";
+  fit();
+}
+function showBoard(on, bannerText) {
+  for (const id of ["clues", "mapwrap", "bar", "guesses"]) $(id).style.display = on ? "" : "none";
+  $("banner").style.display = on ? "none" : "";
+  if (!on) { $("banner").textContent = bannerText; $("result").style.display = "none"; }
+}
+function show() {   // draw the current G: restore saved progress
+  const { puzzle, rec } = G;
   for (const id of rec.guesses) if (id !== puzzle.answer) markWrong(id);
+  G.header();
   renderClues();
   renderGuesses();
   if (rec.done) finish();
 }
+
+// ---------- daily ----------
+function startDaily() {
+  $("mDaily").setAttribute("aria-pressed", "true"); $("mEndless").setAttribute("aria-pressed", "false");
+  $("codeBtn").style.display = "none"; $("skip").style.display = "none";
+  resetBoard();
+  if (!dailyPuzzle) {
+    G = null;
+    $("meta").textContent = "";
+    showBoard(false, num < 1 ? `Hood Guesser launches on ${LAUNCH}. See you then!` : "No puzzle scheduled for today yet. Check back soon!");
+    return;
+  }
+  showBoard(true);
+  const rec = state.results[num] || { guesses: [], done: false, won: false };
+  state.results[num] = rec;
+  G = {
+    mode: "daily", puzzle: dailyPuzzle, rec,
+    save: () => save(state),
+    header: () => { $("meta").textContent = `Puzzle #${num} · streak ${state.streak}`; },
+    recordEnd() {
+      rec.done = true;
+      const prev = Object.keys(state.results).map(Number).filter(d => d < num && state.results[d].done).sort((a, b) => b - a)[0];
+      state.streak = rec.won ? ((prev === num - 1 && state.results[prev].won) ? state.streak : 0) + 1 : 0;
+    },
+    shareText() {
+      const row = rec.guesses.map((g, i) => (rec.won && i === rec.guesses.length - 1) ? "🟩" : "🟥");
+      while (row.length < MAX) row.push("⬛");
+      return `Hood Guesser #${num} ${rec.won ? rec.guesses.length : "X"}/${MAX}\n${row.join("")}\nStreak: ${state.streak}`;
+    },
+    extras() {},
+  };
+  show();
+}
+
+// ---------- endless ----------
+const clueSig = p => p.defs.join(",");
+function pickSeed() {
+  // Avoid recent puzzles, daily clue sets, and today's unfinished daily answer. Done by rerolling the seed, so a
+  // given seed always yields the same puzzle.
+  const recentH = new Set(es.recent.map(r => r.h)), recentS = new Set(es.recent.map(r => r.sig));
+  let seed, p;
+  for (let i = 0; i < 300; i++) {
+    seed = Endless.randomSeed();
+    p = gen.generate(seed);
+    if (recentH.has(p.hood) || recentS.has(clueSig(p))) continue;
+    if (dailyClueSets.has(p.clues.join("\n"))) continue;
+    if (dailyPuzzle && !dailyDone() && p.hood === dailyPuzzle.answer) continue;
+    break;
+  }
+  es.recent.push({ h: p.hood, sig: clueSig(p) });
+  es.recent = es.recent.slice(-RECENT_N);
+  return seed;
+}
+function newCur(seed, fromCode) {
+  es.cur = { v: ENDLESS_DATA.v, seed: seed || pickSeed(), code: !!fromCode, guesses: [], done: false, won: false, skipped: false };
+  saveEndless();
+}
+function abandonCur() {   // leaving an unfinished puzzle behind counts as a loss once the player has guessed
+  const c = es.cur;
+  if (c && !c.done && c.guesses.length) endRecord(c, false);
+}
+function endRecord(c, won) {
+  c.done = true; c.won = won;
+  const r = es.record;
+  r.played++;
+  if (won) r.won++;
+  if (!c.code) {   // code puzzles count toward played/won only
+    if (won) { r.dist[c.guesses.length - 1]++; r.streak++; r.best = Math.max(r.best, r.streak); }
+    else r.streak = 0;
+  }
+}
+function startEndless() {
+  $("mDaily").setAttribute("aria-pressed", "false"); $("mEndless").setAttribute("aria-pressed", "true");
+  $("codeBtn").style.display = ""; $("skip").style.display = "";
+  resetBoard();
+  showBoard(true);
+  if (!es.cur || es.cur.v !== ENDLESS_DATA.v) newCur();
+  const c = es.cur, p = gen.generate(c.seed);
+  const photos = {};
+  p.photos.forEach((ph, i) => { if (ph) photos[i] = ph; });
+  const code = Endless.formatCode(c.v, c.seed);
+  G = {
+    mode: "endless", puzzle: { answer: p.hood, clues: p.clues, photos }, rec: c,
+    save: saveEndless,
+    header: () => { $("meta").textContent = "Endless mode"; },
+    recordEnd() { endRecord(c, c.won); },
+    shareText() {
+      const row = c.guesses.map(id => id === p.hood ? "🟩" : tile(distKm(id)));
+      while (row.length < MAX) row.push("⬛");
+      return `Hood Guesser Endless ${code} ${c.won ? c.guesses.length : "X"}/${MAX}\n${row.join("")}`;
+    },
+    extras(box, row) {
+      const r = es.record;
+      box.innerHTML = `<div class="rec"></div><div class="rec">Puzzle code: <b></b></div>`;
+      box.firstElementChild.textContent = `Won ${r.won} of ${r.played} · streak ${r.streak} · best ${r.best}`;
+      box.lastElementChild.lastElementChild.textContent = code;
+      const next = document.createElement("button");
+      next.textContent = "Next puzzle";
+      next.onclick = () => { newCur(); startEndless(); };
+      row.appendChild(next);
+    },
+  };
+  show();
+}
+$("skip").onclick = () => {
+  if (!G || G.mode !== "endless" || G.rec.done) return;
+  const b = $("skip");
+  if (b.dataset.armed) {   // second tap within a few seconds confirms
+    clearTimeout(+b.dataset.armed); delete b.dataset.armed;
+    G.rec.skipped = true;
+    G.recordEnd(); G.save();
+    finish();
+    return;
+  }
+  b.textContent = "Tap again to give up";
+  b.dataset.armed = setTimeout(() => { delete b.dataset.armed; b.textContent = "Skip"; }, 4000);
+};
+
+// ---------- play a code ----------
+let pendingCode = null;
+function codeMsg(text, err) { $("codeMsg").textContent = text; $("codeMsg").className = err ? "err" : ""; }
+$("codeBtn").onclick = () => { $("codeIn").value = ""; pendingCode = null; $("codeGo").textContent = "Play"; codeMsg(""); $("codeDlg").showModal(); $("codeIn").focus(); };
+$("codeCancel").onclick = () => $("codeDlg").close();
+$("codeIn").oninput = () => { pendingCode = null; $("codeGo").textContent = "Play"; codeMsg(""); };
+$("codeForm").onsubmit = e => {
+  e.preventDefault();
+  const parsed = Endless.parseCode($("codeIn").value);
+  if (!parsed) return codeMsg("That doesn't look like a puzzle code. It should look like 1-ABC234.", true);
+  if (parsed.version !== ENDLESS_DATA.v) return codeMsg("This puzzle is from another version of the game and can't be played here.", true);
+  const p = gen.generate(parsed.seed);
+  if (dailyPuzzle && !dailyDone() && p.hood === dailyPuzzle.answer && pendingCode !== parsed.seed) {
+    pendingCode = parsed.seed;
+    $("codeGo").textContent = "Play anyway";
+    return codeMsg("This puzzle's answer is also today's daily. Play it anyway?");
+  }
+  $("codeDlg").close();
+  abandonCur();
+  newCur(parsed.seed, true);
+  startEndless();
+};
+
+// ---------- mode toggle ----------
+$("mDaily").onclick = startDaily;
+$("mEndless").onclick = startEndless;
+startDaily();
 </script>
 </body>
 </html>
