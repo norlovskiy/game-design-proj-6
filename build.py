@@ -4,6 +4,7 @@ Projects NTA polygons to SVG paths, lightly obfuscates the schedule (XOR + base6
 usage: .venv/bin/python build.py
 """
 import base64
+import hashlib
 import datetime as dt
 import json
 import math
@@ -50,7 +51,16 @@ def main():
         c = g.centroid
         shapes.append({"id": n["id"], "name": n["name"], "boro": n["borough"], "type": n["type"], "d": path_d(g),
                        "c": list(project(c.x, c.y))})   # centroid in SVG units, for guess-distance feedback
-    puzzles = [{"day": s["day"], "date": s["date"], "answer": s["answer"], "clues": s["clues"]} for s in sched]
+    photos_file = DATA / "photos.json"
+    photos = json.loads(photos_file.read_text()) if photos_file.exists() else {}   # slot -> {file, credit}; see pipeline/images.py
+    puzzles = []
+    for s in sched:
+        pics = {}
+        for i, text in enumerate(s["clues"]):
+            slot = hashlib.sha1(text.encode()).hexdigest()[:10]
+            if slot in photos:
+                pics[i] = {"src": "img/" + photos[slot]["file"], "credit": photos[slot]["credit"]}
+        puzzles.append({"day": s["day"], "date": s["date"], "answer": s["answer"], "clues": s["clues"], "photos": pics})
     html = (ROOT / "web" / "index.template.html").read_text()
     html = (html.replace("/*SHAPES*/[]", json.dumps(shapes, separators=(",", ":")))
                 .replace('"/*SCHEDULE*/"', json.dumps(obfuscate(puzzles)))
@@ -61,10 +71,18 @@ def main():
     if "--test-date" in sys.argv:   # dist/test.html: same game pinned to a date, never zipped
         d = sys.argv[sys.argv.index("--test-date") + 1]
         (out / "test.html").write_text(html.replace("<script>\n\"use strict\";", f"<script>window.TEST_DATE={d!r};</script>\n<script>\n\"use strict\";", 1))
+    used = {p["src"] for pz in puzzles for p in pz["photos"].values()}
+    (out / "img").mkdir(exist_ok=True)
+    for old in (out / "img").glob("*.jpg"):
+        old.unlink()
+    for src in used:
+        (out / src).write_bytes((DATA / "img" / src.split("/")[1]).read_bytes())
     with zipfile.ZipFile(out / "nyc-hoods.zip", "w", zipfile.ZIP_DEFLATED) as z:
         z.write(out / "index.html", "index.html")
+        for src in sorted(used):
+            z.write(out / src, src)
     print(f"dist/index.html {len(html)/1024:.0f} KB, {len(shapes)} shapes, {len(puzzles)} puzzles, "
-          f"zip {(out/'nyc-hoods.zip').stat().st_size/1024:.0f} KB")
+          f"{len(used)} photos, zip {(out/'nyc-hoods.zip').stat().st_size/1024:.0f} KB")
 
 
 if __name__ == "__main__":

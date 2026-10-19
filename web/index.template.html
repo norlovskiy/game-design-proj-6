@@ -29,6 +29,10 @@
   #clues li { display: flex; gap: 8px; }
   #clues .n { color: var(--accent); font-weight: 700; min-width: 1.2em; }
   #clues li.locked { color: var(--muted); }
+  #clues .body { flex: 1; min-width: 0; }
+  #clues figure { margin: 6px 0 2px; }
+  #clues img { display: block; max-width: 100%; max-height: 200px; border-radius: 8px; background: var(--water); }
+  #clues figcaption { font-size: 11px; color: var(--muted); margin-top: 2px; }
   #mapwrap { position: relative; flex: 1 1 auto; min-height: 240px; background: var(--water); border-radius: 10px; overflow: hidden; touch-action: none; }
   svg { width: 100%; height: 100%; display: block; }
   path.hood { stroke: var(--line); stroke-width: 0.6px; vector-effect: non-scaling-stroke; cursor: pointer; }
@@ -86,6 +90,8 @@
     <li>Hydrants, NYC DEP</li>
     <li>Individual Landmark Sites, NYC Landmarks Preservation Commission</li>
     <li>MTA Subway Stations and Complexes, MTA (data.ny.gov)</li>
+    <li>Demographics: American Community Survey 5-year (2020\u20132024), U.S. Census Bureau, via Census Reporter</li>
+    <li>Photos: public-domain and CC0 images from Wikimedia Commons; each photo is credited beneath it</li>
   </ul>
   <form method="dialog"><button class="primary">Close</button></form>
 </dialog>
@@ -226,7 +232,8 @@ function start() {
       const li = document.createElement("li");
       const km = distKm(id);
       li.style.borderLeftColor = heat(km);
-      li.textContent = `${byId[id].name} \u00b7 ${km < 1 ? "<1" : km.toFixed(1)} km away`;
+      const mi = km * 0.621371;
+      li.textContent = `${byId[id].name} \u00b7 ${km < 0.1 ? "<0.1" : km.toFixed(1)} km, ${mi < 0.06 ? "<0.06" : mi.toFixed(mi < 1 ? 2 : 1)} mi away`;
       $("guesses").appendChild(li);
     }
   }
@@ -238,8 +245,17 @@ function start() {
     puzzle.clues.forEach((c, i) => {
       const li = document.createElement("li");
       if (i >= shown) li.className = "locked";
-      li.innerHTML = `<span class="n">${i + 1}</span><span></span>`;
-      li.lastChild.textContent = i < shown ? c : "Locked — a wrong guess reveals it.";
+      li.innerHTML = `<span class="n">${i + 1}</span><div class="body"><span class="text"></span></div>`;
+      li.querySelector(".text").textContent = i < shown ? c : "Locked — a wrong guess reveals it.";
+      const photo = puzzle.photos && puzzle.photos[i];
+      if (photo && i < shown) {   // photos load only once their clue is revealed
+        const fig = document.createElement("figure"), img = document.createElement("img"), cap = document.createElement("figcaption");
+        img.src = photo.src; img.alt = "Photo for this clue"; img.loading = "lazy";
+        img.onerror = () => fig.remove();
+        cap.textContent = "Photo: " + photo.credit;
+        fig.append(img, cap);
+        li.querySelector(".body").appendChild(fig);
+      }
       $("clues").appendChild(li);
     });
   }

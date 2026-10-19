@@ -72,6 +72,11 @@ Every clue carries the exact set of neighborhoods it is true for. `pipeline/solv
 - Solver simulation: for each puzzle, count the neighborhoods consistent with clue 1 and with clues 1 to 3, to flag puzzles that are too easy or impossible.
 - Human playtest the first two weeks, then sampled spot-checks.
 
+### Photos
+- Tree-species and landmark clues can show a photo under the clue, loaded only once the clue is revealed, with a credit line.
+- Public domain / CC0 only, from Wikimedia Commons. `pipeline/images.py candidates` finds candidates (geosearch near the landmark, or species search), `sheets` builds contact sheets, and each pick is reviewed by eye and recorded in `data/photo_picks.json`; `fetch` downloads picks at 960 px into `data/img/`. A clue with no approved photo shows none.
+- Photos ship inside the bundle (`img/`), so the page still makes no external requests.
+
 ## 4. Delivery (itch.io)
 
 - Zip upload with `index.html` at the root, relative paths only.
