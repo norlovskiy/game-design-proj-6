@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hood Guesser</title>
+<title>NYClue</title>
 <style>
   :root {
     --bg: #11202b; --panel: #1a2e3c; --ink: #eef3f6; --muted: #9db3c2; --accent: #f2b84b;
@@ -30,8 +30,11 @@
   #clues .n { color: var(--accent); font-weight: 700; min-width: 1.2em; }
   #clues li.locked { color: var(--muted); }
   #clues .body { flex: 1; min-width: 0; }
-  #clues figure { margin: 6px 0 2px; }
+  #clues .pics { display: flex; gap: 6px; margin: 6px 0 2px; }
+  #clues figure { margin: 0; flex: 0 1 auto; min-width: 0; }
+  #clues .pics.multi figure { flex: 1 1 0; }
   #clues img { display: block; max-width: 100%; max-height: 200px; border-radius: 8px; background: var(--water); }
+  #clues .pics.multi img { width: 100%; height: 150px; max-height: none; object-fit: cover; }
   #clues figcaption { font-size: 11px; color: var(--muted); margin-top: 2px; }
   #mapwrap { position: relative; flex: 1 1 auto; min-height: 240px; background: var(--water); border-radius: 10px; overflow: hidden; touch-action: none; }
   svg { width: 100%; height: 100%; display: block; }
@@ -66,22 +69,29 @@
   #codeMsg.err { color: var(--wrong); }
   #result .rec { color: var(--muted); margin: 4px 0; }
   #result .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  #archive { background: var(--panel); border-radius: 10px; padding: 8px 12px; overflow-y: auto; }
+  #archive h2 { margin: 4px 0 8px; font-size: 16px; }
+  #archive ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  #archive li button { width: 100%; display: flex; justify-content: space-between; gap: 8px; text-align: left; }
+  #archive .st { color: var(--muted); white-space: nowrap; }
+  #archive .st.won { color: var(--right); } #archive .st.lost { color: var(--wrong); }
   .banner { text-align: center; padding: 40px 12px; color: var(--muted); }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div><h1>Hood Guesser</h1><div class="meta" id="meta"></div></div>
+    <div><h1>NYClue</h1><div class="meta" id="meta"></div></div>
     <div><button id="help" aria-label="About and credits">?</button></div>
   </header>
   <div id="modebar">
     <div class="seg" role="group" aria-label="Game mode">
-      <button id="mDaily" aria-pressed="true">Daily</button><button id="mEndless" aria-pressed="false">Endless</button>
+      <button id="mDaily" aria-pressed="true">Daily</button><button id="mEndless" aria-pressed="false">Endless</button><button id="mArchive" aria-pressed="false">Archive</button>
     </div>
     <button class="link" id="codeBtn" style="display:none">Play a code</button>
   </div>
   <div id="banner" class="banner" style="display:none"></div>
+  <div id="archive" style="display:none"></div>
   <ol id="clues"></ol>
   <ul id="guesses" aria-label="Your guesses"></ul>
   <div id="mapwrap">
@@ -102,6 +112,13 @@
       <button class="primary" id="codeGo" type="submit">Play</button><button type="button" id="codeCancel">Cancel</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="intro">
+  <h2>How To Play</h2>
+  <p>You have 5 tries to guess the NYC neighborhood.</p>
+  <p>Each wrong guess reveals distance from the answer and a new hint.</p>
+  <form method="dialog"><button class="primary" id="introOk">Got it</button></form>
 </dialog>
 
 <dialog id="about">
@@ -141,17 +158,17 @@ const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] ?? null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } },
 };
-function load() { try { return JSON.parse(store.get("hoodguesser") || "{}"); } catch (e) { return {}; } }
-function save(s) { store.set("hoodguesser", JSON.stringify(s)); }
+function load() { try { return JSON.parse(store.get("nyclue") || "{}"); } catch (e) { return {}; } }
+function save(s) { store.set("nyclue", JSON.stringify(s)); }
 function loadEndless() {
   let e = {};
-  try { e = JSON.parse(store.get("hoodguesser_endless") || "{}"); } catch (err) { e = {}; }
+  try { e = JSON.parse(store.get("nyclue_endless") || "{}"); } catch (err) { e = {}; }
   e.cur = e.cur || null;
   e.recent = e.recent || [];
   e.record = Object.assign({ played: 0, won: 0, dist: [0, 0, 0, 0, 0], streak: 0, best: 0 }, e.record);
   return e;
 }
-const saveEndless = () => store.set("hoodguesser_endless", JSON.stringify(es));
+const saveEndless = () => store.set("nyclue_endless", JSON.stringify(es));
 
 // ---------- today's puzzle ----------
 function nyDate() {
@@ -175,6 +192,7 @@ const dailyClueSets = new Set(puzzles.map(p => p.clues.join("\n")));
 let state = load();
 state.results = state.results || {};
 state.streak = state.streak || 0;
+state.archive = state.archive || {};   // past puzzles played from the archive; never touches the streak
 const dailyDone = () => !!(state.results[num] && state.results[num].done);
 
 const gen = Endless.create(ENDLESS_DATA);
@@ -282,14 +300,23 @@ function renderClues() {
     if (i >= shown) li.className = "locked";
     li.innerHTML = `<span class="n">${i + 1}</span><div class="body"><span class="text"></span></div>`;
     li.querySelector(".text").textContent = i < shown ? c : "Locked — a wrong guess reveals it.";
-    const photo = puzzle.photos && puzzle.photos[i];
-    if (photo && i < shown) {   // photos load only once their clue is revealed
-      const fig = document.createElement("figure"), img = document.createElement("img"), cap = document.createElement("figcaption");
-      img.src = photo.src; img.alt = "Photo for this clue"; img.loading = "lazy";
-      img.onerror = () => fig.remove();
-      cap.textContent = "Photo: " + photo.credit;
-      fig.append(img, cap);
-      li.querySelector(".body").appendChild(fig);
+    const photos = puzzle.photos && puzzle.photos[i];
+    if (photos && photos.length && i < shown) {   // photos load only once their clue is revealed; several sit side by side
+      const row = document.createElement("div");
+      row.className = "pics" + (photos.length > 1 ? " multi" : "");
+      for (const photo of photos) {
+        const fig = document.createElement("figure"), img = document.createElement("img");
+        img.src = photo.src; img.alt = "Photo for this clue"; img.loading = "lazy";
+        img.onerror = () => fig.remove();
+        fig.appendChild(img);
+        if (photo.credit) {
+          const cap = document.createElement("figcaption");
+          cap.textContent = "Photo: " + photo.credit;
+          fig.appendChild(cap);
+        }
+        row.appendChild(fig);
+      }
+      li.querySelector(".body").appendChild(row);
     }
     $("clues").appendChild(li);
   });
@@ -357,6 +384,7 @@ function resetBoard() {   // clear everything the previous puzzle left on screen
   fit();
 }
 function showBoard(on, bannerText) {
+  $("archive").style.display = "none";
   for (const id of ["clues", "mapwrap", "bar", "guesses"]) $(id).style.display = on ? "" : "none";
   $("banner").style.display = on ? "none" : "";
   if (!on) { $("banner").textContent = bannerText; $("result").style.display = "none"; }
@@ -370,37 +398,75 @@ function show() {   // draw the current G: restore saved progress
   if (rec.done) finish();
 }
 
-// ---------- daily ----------
-function startDaily() {
-  $("mDaily").setAttribute("aria-pressed", "true"); $("mEndless").setAttribute("aria-pressed", "false");
+// ---------- daily and archive ----------
+const setMode = m => { for (const [id, k] of [["mDaily", "daily"], ["mEndless", "endless"], ["mArchive", "archive"]]) $(id).setAttribute("aria-pressed", String(m === k)); };
+const fmtDate = d => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short", day: "numeric" }).format(new Date(d + "T00:00:00Z"));
+function startDaily() { playDay(num, false); }
+function playDay(n, archived) {   // archived: a past puzzle opened from the archive
+  setMode(archived ? "archive" : "daily");
   $("codeBtn").style.display = "none"; $("skip").style.display = "none";
   resetBoard();
-  if (!dailyPuzzle) {
+  const puzzle = archived ? puzzles.find(p => p.day === n) : dailyPuzzle;
+  if (!puzzle) {
     G = null;
     $("meta").textContent = "";
-    showBoard(false, num < 1 ? `Hood Guesser launches on ${LAUNCH}. See you then!` : "No puzzle scheduled for today yet. Check back soon!");
+    showBoard(false, num < 1 ? `NYClue launches on ${LAUNCH}. See you then!` : "No puzzle scheduled for today yet. Check back soon!");
     return;
   }
   showBoard(true);
-  const rec = state.results[num] || { guesses: [], done: false, won: false };
-  state.results[num] = rec;
+  // a day's own daily record is shared with the archive; archive-only plays are kept apart so they cannot affect the streak
+  const store_ = (!archived || state.results[n]) ? state.results : state.archive;
+  const rec = store_[n] || { guesses: [], done: false, won: false };
+  store_[n] = rec;
   G = {
-    mode: "daily", puzzle: dailyPuzzle, rec,
+    mode: archived ? "archive" : "daily", puzzle, rec,
     save: () => save(state),
-    header: () => { $("meta").textContent = `Puzzle #${num} · streak ${state.streak}`; },
+    header: () => { $("meta").textContent = archived ? `Archive · Puzzle #${n} · ${fmtDate(puzzle.date)}` : `Puzzle #${n} · streak ${state.streak}`; },
     recordEnd() {
       rec.done = true;
-      const prev = Object.keys(state.results).map(Number).filter(d => d < num && state.results[d].done).sort((a, b) => b - a)[0];
-      state.streak = rec.won ? ((prev === num - 1 && state.results[prev].won) ? state.streak : 0) + 1 : 0;
+      if (archived) return;
+      const prev = Object.keys(state.results).map(Number).filter(d => d < n && state.results[d].done).sort((a, b) => b - a)[0];
+      state.streak = rec.won ? ((prev === n - 1 && state.results[prev].won) ? state.streak : 0) + 1 : 0;
     },
     shareText() {
       const row = rec.guesses.map((g, i) => (rec.won && i === rec.guesses.length - 1) ? "🟩" : "🟥");
       while (row.length < MAX) row.push("⬛");
-      return `Hood Guesser #${num} ${rec.won ? rec.guesses.length : "X"}/${MAX}\n${row.join("")}\nStreak: ${state.streak}`;
+      return `NYClue #${n} ${rec.won ? rec.guesses.length : "X"}/${MAX}\n${row.join("")}` + (archived ? "" : `\nStreak: ${state.streak}`);
     },
-    extras() {},
+    extras(box, row) {
+      if (!archived) return;
+      const back = document.createElement("button");
+      back.textContent = "Back to archive";
+      back.onclick = showArchive;
+      row.appendChild(back);
+    },
   };
   show();
+}
+function showArchive() {
+  setMode("archive");
+  $("codeBtn").style.display = "none"; $("skip").style.display = "none";
+  G = null;
+  $("meta").textContent = "Puzzle archive";
+  showBoard(false, "");
+  $("banner").style.display = "none";
+  const box = $("archive");
+  box.style.display = "";
+  box.innerHTML = "<h2>Past puzzles</h2>";
+  const past = puzzles.filter(p => p.day < num).sort((a, b) => b.day - a.day);
+  if (!past.length) { box.insertAdjacentHTML("beforeend", "<p class='meta'>No past puzzles yet. Come back tomorrow!</p>"); return; }
+  const ul = document.createElement("ul");
+  for (const p of past) {
+    const r = state.results[p.day] || state.archive[p.day];
+    const st = r && r.done ? (r.won ? [`Solved in ${r.guesses.length}/${MAX}`, "won"] : ["Missed", "lost"]) : r && r.guesses.length ? ["In progress", ""] : ["Not played", ""];
+    const li = document.createElement("li"), b = document.createElement("button");
+    b.innerHTML = `<span></span><span class="st ${st[1]}"></span>`;
+    b.firstElementChild.textContent = `#${p.day} · ${fmtDate(p.date)}`;
+    b.lastElementChild.textContent = st[0];
+    b.onclick = () => playDay(p.day, true);
+    li.appendChild(b); ul.appendChild(li);
+  }
+  box.appendChild(ul);
 }
 
 // ---------- endless ----------
@@ -441,7 +507,7 @@ function endRecord(c, won) {
   }
 }
 function startEndless() {
-  $("mDaily").setAttribute("aria-pressed", "false"); $("mEndless").setAttribute("aria-pressed", "true");
+  setMode("endless");
   $("codeBtn").style.display = ""; $("skip").style.display = "";
   resetBoard();
   showBoard(true);
@@ -458,7 +524,7 @@ function startEndless() {
     shareText() {
       const row = c.guesses.map(id => id === p.hood ? "🟩" : tile(distKm(id)));
       while (row.length < MAX) row.push("⬛");
-      return `Hood Guesser Endless ${code} ${c.won ? c.guesses.length : "X"}/${MAX}\n${row.join("")}`;
+      return `NYClue Endless ${code} ${c.won ? c.guesses.length : "X"}/${MAX}\n${row.join("")}`;
     },
     extras(box, row) {
       const r = es.record;
@@ -513,7 +579,12 @@ $("codeForm").onsubmit = e => {
 // ---------- mode toggle ----------
 $("mDaily").onclick = startDaily;
 $("mEndless").onclick = startEndless;
+$("mArchive").onclick = showArchive;
 startDaily();
+if (!store.get("nyclue_seen")) {   // first visit: show the short how-to-play pop-up once
+  $("intro").showModal();
+  store.set("nyclue_seen", "1");
+}
 </script>
 </body>
 </html>

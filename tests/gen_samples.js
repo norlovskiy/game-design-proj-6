@@ -12,5 +12,5 @@ for (let i = 0; i < count; i++) {
 }
 // exhaustive viability, independent of generate(): can the unordered search find any combo?
 const viable = gen.viable.filter(h => gen.search(h, l => l));
-const codes = ["1-ABC234", "xx 1-k7qm2x yy", "1-ABC23", "1-ABC230", "Hood Guesser Endless 1-K7QM2X 3/5"].map(t => Endless.parseCode(t));
+const codes = ["1-ABC234", "xx 1-k7qm2x yy", "1-ABC23", "1-ABC230", "NYClue Endless 1-K7QM2X 3/5"].map(t => Endless.parseCode(t));
 console.log(JSON.stringify({ puzzles, viable, all: gen.viable, codes }));

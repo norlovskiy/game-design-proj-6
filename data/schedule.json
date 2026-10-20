@@ -1,7 +1,7 @@
 [
  {
   "day": 1,
-  "date": "2026-10-19",
+  "date": "2026-10-14",
   "answer": "SI0204",
   "answer_name": "New Springville-Willowbrook-Bulls Head-Travis",
   "clues": [
@@ -28,7 +28,7 @@
  },
  {
   "day": 2,
-  "date": "2026-10-20",
+  "date": "2026-10-15",
   "answer": "QN0201",
   "answer_name": "Long Island City-Hunters Point",
   "clues": [
@@ -55,7 +55,7 @@
  },
  {
   "day": 3,
-  "date": "2026-10-21",
+  "date": "2026-10-16",
   "answer": "BK1303",
   "answer_name": "Brighton Beach",
   "clues": [
@@ -82,7 +82,7 @@
  },
  {
   "day": 4,
-  "date": "2026-10-22",
+  "date": "2026-10-17",
   "answer": "MN0203",
   "answer_name": "West Village",
   "clues": [
@@ -109,7 +109,7 @@
  },
  {
   "day": 5,
-  "date": "2026-10-23",
+  "date": "2026-10-18",
   "answer": "MN1202",
   "answer_name": "Washington Heights (North)",
   "clues": [
@@ -136,7 +136,7 @@
  },
  {
   "day": 6,
-  "date": "2026-10-24",
+  "date": "2026-10-19",
   "answer": "BK1701",
   "answer_name": "East Flatbush-Erasmus",
   "clues": [
@@ -163,7 +163,7 @@
  },
  {
   "day": 7,
-  "date": "2026-10-25",
+  "date": "2026-10-20",
   "answer": "BK0502",
   "answer_name": "East New York (North)",
   "clues": [
@@ -190,7 +190,7 @@
  },
  {
   "day": 8,
-  "date": "2026-10-26",
+  "date": "2026-10-21",
   "answer": "BX1001",
   "answer_name": "Westchester Square",
   "clues": [
@@ -217,7 +217,7 @@
  },
  {
   "day": 9,
-  "date": "2026-10-27",
+  "date": "2026-10-22",
   "answer": "BK0301",
   "answer_name": "Bedford-Stuyvesant (West)",
   "clues": [
@@ -244,7 +244,7 @@
  },
  {
   "day": 10,
-  "date": "2026-10-28",
+  "date": "2026-10-23",
   "answer": "QN1103",
   "answer_name": "Douglaston-Little Neck",
   "clues": [
@@ -271,7 +271,7 @@
  },
  {
   "day": 11,
-  "date": "2026-10-29",
+  "date": "2026-10-24",
   "answer": "BK0602",
   "answer_name": "Park Slope",
   "clues": [
@@ -298,7 +298,7 @@
  },
  {
   "day": 12,
-  "date": "2026-10-30",
+  "date": "2026-10-25",
   "answer": "QN1102",
   "answer_name": "Bayside",
   "clues": [
@@ -325,7 +325,7 @@
  },
  {
   "day": 13,
-  "date": "2026-10-31",
+  "date": "2026-10-26",
   "answer": "BX0703",
   "answer_name": "Norwood",
   "clues": [
@@ -352,7 +352,7 @@
  },
  {
   "day": 14,
-  "date": "2026-11-01",
+  "date": "2026-10-27",
   "answer": "MN0901",
   "answer_name": "Morningside Heights",
   "clues": [
@@ -379,7 +379,7 @@
  },
  {
   "day": 15,
-  "date": "2026-11-02",
+  "date": "2026-10-28",
   "answer": "BX0601",
   "answer_name": "West Farms",
   "clues": [
@@ -406,7 +406,7 @@
  },
  {
   "day": 16,
-  "date": "2026-11-03",
+  "date": "2026-10-29",
   "answer": "QN0105",
   "answer_name": "Queensbridge-Ravenswood-Dutch Kills",
   "clues": [
@@ -433,7 +433,7 @@
  },
  {
   "day": 17,
-  "date": "2026-11-04",
+  "date": "2026-10-30",
   "answer": "BK0902",
   "answer_name": "Prospect Lefferts Gardens-Wingate",
   "clues": [
@@ -460,7 +460,7 @@
  },
  {
   "day": 18,
-  "date": "2026-11-05",
+  "date": "2026-10-31",
   "answer": "BK1501",
   "answer_name": "Gravesend (East)-Homecrest",
   "clues": [
@@ -487,7 +487,7 @@
  },
  {
   "day": 19,
-  "date": "2026-11-06",
+  "date": "2026-11-01",
   "answer": "MN0303",
   "answer_name": "East Village",
   "clues": [
@@ -514,7 +514,7 @@
  },
  {
   "day": 20,
-  "date": "2026-11-07",
+  "date": "2026-11-02",
   "answer": "MN1101",
   "answer_name": "East Harlem (South)",
   "clues": [
@@ -541,7 +541,7 @@
  },
  {
   "day": 21,
-  "date": "2026-11-08",
+  "date": "2026-11-03",
   "answer": "BK1301",
   "answer_name": "Gravesend (South)",
   "clues": [
@@ -568,7 +568,7 @@
  },
  {
   "day": 22,
-  "date": "2026-11-09",
+  "date": "2026-11-04",
   "answer": "BK0801",
   "answer_name": "Prospect Heights",
   "clues": [
@@ -595,7 +595,7 @@
  },
  {
   "day": 23,
-  "date": "2026-11-10",
+  "date": "2026-11-05",
   "answer": "QN0701",
   "answer_name": "College Point",
   "clues": [
@@ -622,7 +622,7 @@
  },
  {
   "day": 24,
-  "date": "2026-11-11",
+  "date": "2026-11-06",
   "answer": "QN1001",
   "answer_name": "South Ozone Park",
   "clues": [
@@ -649,7 +649,7 @@
  },
  {
   "day": 25,
-  "date": "2026-11-12",
+  "date": "2026-11-07",
   "answer": "BK0202",
   "answer_name": "Downtown Brooklyn-DUMBO-Boerum Hill",
   "clues": [
@@ -676,7 +676,7 @@
  },
  {
   "day": 26,
-  "date": "2026-11-13",
+  "date": "2026-11-08",
   "answer": "SI0106",
   "answer_name": "Port Richmond",
   "clues": [
@@ -703,7 +703,7 @@
  },
  {
   "day": 27,
-  "date": "2026-11-14",
+  "date": "2026-11-09",
   "answer": "QN0702",
   "answer_name": "Whitestone-Beechhurst",
   "clues": [
@@ -730,7 +730,7 @@
  },
  {
   "day": 28,
-  "date": "2026-11-15",
+  "date": "2026-11-10",
   "answer": "MN0201",
   "answer_name": "SoHo-Little Italy-Hudson Square",
   "clues": [
@@ -757,7 +757,7 @@
  },
  {
   "day": 29,
-  "date": "2026-11-16",
+  "date": "2026-11-11",
   "answer": "QN1403",
   "answer_name": "Breezy Point-Belle Harbor-Rockaway Park-Broad Channel",
   "clues": [
@@ -784,7 +784,7 @@
  },
  {
   "day": 30,
-  "date": "2026-11-17",
+  "date": "2026-11-12",
   "answer": "BK1803",
   "answer_name": "Canarsie",
   "clues": [

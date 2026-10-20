@@ -1,4 +1,4 @@
-"""Bundle the game into dist/index.html (single self-contained file) and dist/nyc-hoods.zip for itch.io.
+"""Bundle the game into dist/index.html (single self-contained file) and dist/nyclue.zip for itch.io.
 
 Projects NTA polygons to SVG paths, lightly obfuscates the schedule (XOR + base64), inlines both.
 usage: .venv/bin/python build.py
@@ -47,6 +47,28 @@ def photo_slot(text):
     return hashlib.sha1(text.encode()).hexdigest()[:10]
 
 
+NAMED = json.loads((DATA / "photo_names.json").read_text())   # species / landmark name -> file; see that file
+
+
+def _entry(file_or_obj):
+    o = file_or_obj if isinstance(file_or_obj, dict) else {"file": file_or_obj}
+    return {"src": "img/" + o["file"], "credit": o.get("credit", "")}
+
+
+def clue_photos(text, template, photos):
+    """Photos for one clue: a clue-level photo (hash of the text; pipeline/images.py) plus one per named landmark or species."""
+    out = []
+    slot = photo_slot(text)
+    if slot in photos:
+        out.append({"src": "img/" + photos[slot]["file"], "credit": photos[slot]["credit"]})
+    if template.startswith("landmark_name"):
+        names = text.removeprefix("Landmarks here include: ").removesuffix(".").split("; ")
+        out += [_entry(NAMED["landmarks"][n]) for n in names if n in NAMED["landmarks"]]
+    elif ":species:" in template and template.rsplit(":", 1)[1] in NAMED["species"]:
+        out.append(_entry(NAMED["species"][template.rsplit(":", 1)[1]]))
+    return out
+
+
 def endless_payload(photos):
     """Trimmed clue data for the in-browser generator (web/endless.js).
 
@@ -67,8 +89,7 @@ def endless_payload(photos):
         for c in usable.values():
             key = (c["template"], c["text"])
             if key not in def_of:
-                slot = photo_slot(c["text"])
-                photo = {"src": "img/" + photos[slot]["file"], "credit": photos[slot]["credit"]} if slot in photos else 0
+                photo = clue_photos(c["text"], c["template"], photos) or 0
                 def_of[key] = len(defs)
                 defs.append([c["tier"], c["text"], c["template"], sorted(idx[m] for m in c["matches"]), photo])
             entries.append([def_of[key], c["quality"]])
@@ -92,10 +113,10 @@ def main():
     puzzles = []
     for s in sched:
         pics = {}
-        for i, text in enumerate(s["clues"]):
-            slot = photo_slot(text)
-            if slot in photos:
-                pics[i] = {"src": "img/" + photos[slot]["file"], "credit": photos[slot]["credit"]}
+        for i, (text, template) in enumerate(zip(s["clues"], s["templates"])):
+            found = clue_photos(text, template, photos)
+            if found:
+                pics[i] = found
         puzzles.append({"day": s["day"], "date": s["date"], "answer": s["answer"], "clues": s["clues"], "photos": pics})
     endless = endless_payload(photos)
     html = (ROOT / "web" / "index.template.html").read_text()
@@ -110,19 +131,19 @@ def main():
     if "--test-date" in sys.argv:   # dist/test.html: same game pinned to a date, never zipped
         d = sys.argv[sys.argv.index("--test-date") + 1]
         (out / "test.html").write_text(html.replace("<script>\n\"use strict\";", f"<script>window.TEST_DATE={d!r};</script>\n<script>\n\"use strict\";", 1))
-    used = {p["src"] for pz in puzzles for p in pz["photos"].values()}
-    used |= {d[4]["src"] for d in endless["defs"] if d[4]}
+    used = {p["src"] for pz in puzzles for ps in pz["photos"].values() for p in ps}
+    used |= {p["src"] for d in endless["defs"] if d[4] for p in d[4]}
     (out / "img").mkdir(exist_ok=True)
-    for old in (out / "img").glob("*.jpg"):
+    for old in (out / "img").glob("*"):
         old.unlink()
     for src in used:
         (out / src).write_bytes((DATA / "img" / src.split("/")[1]).read_bytes())
-    with zipfile.ZipFile(out / "nyc-hoods.zip", "w", zipfile.ZIP_DEFLATED) as z:
+    with zipfile.ZipFile(out / "nyclue.zip", "w", zipfile.ZIP_DEFLATED) as z:
         z.write(out / "index.html", "index.html")
         for src in sorted(used):
             z.write(out / src, src)
     print(f"dist/index.html {len(html)/1024:.0f} KB, {len(shapes)} shapes, {len(puzzles)} puzzles, "
-          f"{len(endless['hoods'])} endless neighborhoods, {len(used)} photos, zip {(out/'nyc-hoods.zip').stat().st_size/1024:.0f} KB")
+          f"{len(endless['hoods'])} endless neighborhoods, {len(used)} photos, zip {(out/'nyclue.zip').stat().st_size/1024:.0f} KB")
 
 
 if __name__ == "__main__":

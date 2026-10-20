@@ -1,4 +1,4 @@
-# NYC Neighborhood Daily: Spec (v1)
+# NYClue: Spec (v1)
 
 A daily puzzle game. Players guess an NYC neighborhood from clues derived from NYC Open Data (https://www.nyc.gov/opendata). Distribution: itch.io (HTML5 upload) only.
 
@@ -6,7 +6,7 @@ A daily puzzle game. Players guess an NYC neighborhood from clues derived from N
 
 - One puzzle per day, identical for all players.
 - Puzzle day boundary: midnight `America/New_York`, computed client-side with `Intl.DateTimeFormat`.
-- **Launch date: 2026-10-19** (puzzle #1). Puzzle number = days since launch + 1.
+- **Launch date: 2026-10-14** (puzzle #1; moved from 10-19 so the demo has six past puzzles by 10-20). Puzzle number = days since launch + 1.
 - 5 guesses, 5 clues. Clue 1 is shown at start; each wrong guess reveals the next clue.
 - Win: correct guess within 5. Lose: 5 wrong guesses; the answer is highlighted and all clues are listed.
 - Day ends on win or loss. Result is stored; replaying the same day is blocked.
@@ -128,7 +128,18 @@ A second mode beside the daily puzzle: unlimited puzzles, same format (5 clues a
 - The endless record is stored separately from the daily streak: played, won, guess distribution, current streak and best streak. Code puzzles count toward played and won only.
 
 ### Sharing
-- Emoji card (`Hood Guesser Endless <code> 3/5` then one tile per guess, padded with ⬛) using the daily legend (🟨 <3 km, 🟧 <10 km, 🟥 farther, 🟩 correct, ⬛ unused), with the code and no puzzle number, for example `Hood Guesser Endless 2-K7QM2X 🟨🟧🟩`. Same Clipboard API and selectable-text fallback as daily.
+- Emoji card (`NYClue Endless <code> 3/5` then one tile per guess, padded with ⬛) using the daily legend (🟨 <3 km, 🟧 <10 km, 🟥 farther, 🟩 correct, ⬛ unused), with the code and no puzzle number, for example `NYClue Endless 2-K7QM2X 🟨🟧🟩`. Same Clipboard API and selectable-text fallback as daily.
 
 ### Credits
 - Unchanged: the credits screen already names every dataset.
+
+## 7. Archive (demo)
+
+- A third button, Archive, sits beside the Daily | Endless toggle. It lists every past puzzle (day number lower than today's), newest first, each with its date and status: Not played, In progress, Solved in n/5, or Missed.
+- Selecting one plays it exactly like the daily (same clues, 5 guesses, map). The share card reads `NYClue #n 3/5` with no streak line, and the end screen has a "Back to archive" button.
+- Archive plays never touch the daily streak. A past day's own daily record (played on the day) and its archive status are the same record; archive-only plays are stored apart in `localStorage`.
+- Today's puzzle is not listed; it is played from Daily.
+
+## 8. Naming
+
+The game is called NYClue. Storage keys are `nyclue` and `nyclue_endless` (fresh keys, since moving the launch date renumbered the puzzles); the itch.io zip is `dist/nyclue.zip`.

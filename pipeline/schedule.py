@@ -14,7 +14,7 @@ from pathlib import Path
 from solver import combos, metric_keys
 
 DATA = Path(__file__).resolve().parent.parent / "data"
-LAUNCH = dt.date(2026, 10, 19)
+LAUNCH = dt.date(2026, 10, 14)
 SEED = 20261019
 RECENT = 5   # don't reuse a clue metric within this many days
 
